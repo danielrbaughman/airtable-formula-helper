@@ -36,6 +36,9 @@ def main():
         ),
     )
     print(formula)
+    field = DateField(name="DueDate")
+    result = field.is_on("2023-12-25")
+    print(result)
 
 
 if __name__ == "__main__":
