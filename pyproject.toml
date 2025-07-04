@@ -5,6 +5,7 @@ description = "Utilities for generating Airtable formulas"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "dateparser>=1.2.2",
 ]
 
 [build-system]
@@ -26,6 +27,9 @@ dev = [
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+
+[tool.ty.environment]
+python = ".venv"
 
 [tool.ruff]
 line-length = 100
