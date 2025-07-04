@@ -20,7 +20,8 @@ def main():
             TextField(name="field8").not_contains("value8"),
             TextListField(name="field9").contains("value9"),
             BooleanField(name="field10").is_true(),
-            DateField(name="field11").is_on().value("2023-10-01"),
+            DateField(name="field11").is_on().date("2023-10-01"),
+            DateField(name="field12").is_on_or_after().minutes_ago(30),
         ),
     )
     print(formula)

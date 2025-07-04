@@ -1,7 +1,10 @@
+from datetime import datetime
 from typing import Literal
 
 import dateparser
 from pydantic import BaseModel
+
+COMPARISON = Literal["=", "!=", ">", "<", ">=", "<="]
 
 # class Formula():
 #     table: str
@@ -103,8 +106,6 @@ class TextListField(Field):
     def contains_any(self, values: list[str]) -> str:
         return OR(*[self.contains(value) for value in values])
 
-COMPARISON = Literal["=", "!=", ">", "<", ">=", "<="]
-
 class Number(Field):
     """Number comparison formulas"""
 
@@ -159,39 +160,42 @@ class AttachmentsField(Field):
 class DateComparison(Field):
     compare: COMPARISON
 
-    def value(self, date: str) -> str:
-        parsed_date = dateparser.parse(date)
+    def date(self, date: str | datetime) -> str:
+        if isinstance(date, datetime):
+            parsed_date = date
+        else:
+            parsed_date = dateparser.parse(date)
         return f"DATETIME_PARSE('{parsed_date}'){self.compare}DATETIME_PARSE({{{self.name}}})"
 
     def _ago(self, unit: str, value: int) -> str:
         return f"DATETIME_DIFF(NOW(), {{{self.name}}}, '{unit}'){self.compare}{value}"
 
-    def milliseconds_ago(self, value: int) -> str:
-        return self._ago("milliseconds", value)
+    def milliseconds_ago(self, milliseconds: int) -> str:
+        return self._ago("milliseconds", milliseconds)
 
-    def seconds_ago(self, value: int) -> str:
-        return self._ago("seconds", value)
+    def seconds_ago(self, seconds: int) -> str:
+        return self._ago("seconds", seconds)
 
-    def minutes_ago(self, value: int) -> str:
-        return self._ago("minutes", value)
+    def minutes_ago(self, minutes: int) -> str:
+        return self._ago("minutes", minutes)
 
-    def hours_ago(self, value: int) -> str:
-        return self._ago("hours", value)
+    def hours_ago(self, hours: int) -> str:
+        return self._ago("hours", hours)
 
-    def days_ago(self, value: int) -> str:
-        return self._ago("days", value)
+    def days_ago(self, days: int) -> str:
+        return self._ago("days", days)
 
-    def weeks_ago(self, value: int) -> str:
-        return self._ago("weeks", value)
+    def weeks_ago(self, weeks: int) -> str:
+        return self._ago("weeks", weeks)
 
-    def months_ago(self, value: int) -> str:
-        return self._ago("months", value)
+    def months_ago(self, months: int) -> str:
+        return self._ago("months", months)
 
-    def quarters_ago(self, value: int) -> str:
-        return self._ago("quarters", value)
+    def quarters_ago(self, quarters: int) -> str:
+        return self._ago("quarters", quarters)
 
-    def years_ago(self, value: int) -> str:
-        return self._ago("years", value)
+    def years_ago(self, years: int) -> str:
+        return self._ago("years", years)
 
 class DateField(Field):
     """DateTime comparison formulas"""
