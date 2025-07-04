@@ -21,6 +21,7 @@ dev = [
     "dotenv>=0.9.9",
     "pre-commit>=4.2.0",
     "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
     "ruff>=0.12.1",
     "ty>=0.0.1a12",
     "typer>=0.16.0",
