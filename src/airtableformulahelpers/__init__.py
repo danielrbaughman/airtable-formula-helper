@@ -109,7 +109,7 @@ class TextField(Field):
         return f'REGEX_MATCH({{{self.name}}}, "{pattern}")'
 
 
-class ListField(Field):
+class TextListField(Field):
     """String list comparison formulas"""
 
     def contains(self, value: str) -> str:
@@ -125,7 +125,7 @@ class ListField(Field):
         return OR(*[self.contains(value) for value in values])
 
 
-class Number(Field):
+class NumberField(Field):
     """Number comparison formulas"""
 
     def _compare(self, comparison: COMPARISON, value: int | float) -> str:
@@ -150,7 +150,7 @@ class Number(Field):
         return self._compare("<=", value)
 
 
-class BoolField(Field):
+class BooleanField(Field):
     """Boolean comparison formulas"""
 
     def equals(self, value: bool) -> str:

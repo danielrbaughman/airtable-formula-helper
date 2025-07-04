@@ -1,7 +1,18 @@
 from rich import print
 from typer import Typer
 
-from airtableformulahelpers import AND, IF, NOT, OR, BoolField, DateField, ListField, TextField
+from airtableformulahelpers import (
+    AND,
+    IF,
+    NOT,
+    OR,
+    AttachmentsField,
+    BooleanField,
+    DateField,
+    NumberField,
+    TextField,
+    TextListField,
+)
 
 app = Typer(rich_markup_mode="markdown")
 
@@ -18,13 +29,15 @@ def main():
             TextField(name="field6").is_empty(),
             TextField(name="field7").contains("value7"),
             TextField(name="field8").not_contains("value8"),
-            ListField(name="field9").contains("value9"),
-            BoolField(name="field10").is_true(),
+            TextListField(name="field9").contains("value9"),
+            BooleanField(name="field10").is_true(),
             DateField(name="field11").is_on()._date("2023-10-01"),
             DateField(name="field12").is_on().days_ago(7),
             DateField(name="field13").is_on("2023-10-01T12:00:00Z"),
             DateField(name="field14").is_before().days_ago(30),
             DateField(name="field14").is_before("today"),
+            AttachmentsField(name="field15").is_not_empty(),
+            NumberField(name="field16").greater_than(10),
             IF(
                 OR(
                     DateField(name="field15").is_on_or_after().days_ago(7),

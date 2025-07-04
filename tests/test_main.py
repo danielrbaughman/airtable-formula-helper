@@ -7,13 +7,13 @@ from airtableformulahelpers import (
     OR,
     XOR,
     AttachmentsField,
-    BoolField,
+    BooleanField,
     DateComparison,
     DateField,
     Field,
-    ListField,
-    Number,
+    NumberField,
     TextField,
+    TextListField,
     id_equals,
 )
 
@@ -40,7 +40,7 @@ class TestLogicFunctions:
         def test_and_with_field_conditions(self):
             """Test AND with real field conditions"""
             name_field = TextField(name="Name")
-            status_field = BoolField(name="Active")
+            status_field = BooleanField(name="Active")
             
             result = AND(
                 name_field.equals("John"),
@@ -109,8 +109,8 @@ class TestLogicFunctions:
 
         def test_xor_with_field_conditions(self):
             """Test XOR with real field conditions"""
-            flag1 = BoolField(name="Flag1")
-            flag2 = BoolField(name="Flag2")
+            flag1 = BooleanField(name="Flag1")
+            flag2 = BooleanField(name="Flag2")
             
             result = XOR(
                 flag1.is_true(),
@@ -144,7 +144,7 @@ class TestLogicFunctions:
 
         def test_not_with_field_conditions(self):
             """Test NOT with real field conditions"""
-            active_field = BoolField(name="Active")
+            active_field = BooleanField(name="Active")
             
             result = NOT(active_field.is_true())
             assert result == "NOT({Active}=TRUE())"
@@ -185,7 +185,7 @@ class TestLogicFunctions:
             """Test a real-world complex formula"""
             name_field = TextField(name="Name")
             status_field = TextField(name="Status")
-            active_field = BoolField(name="Active")
+            active_field = BooleanField(name="Active")
             
             result = OR(
                 AND(
@@ -250,8 +250,8 @@ class TestLogicFunctions:
         def test_logical_functions_with_mixed_types(self):
             """Test logical functions with mixed field types"""
             text_field = TextField(name="Name")
-            bool_field = BoolField(name="Active")
-            number_field = Number(name="Score")
+            bool_field = BooleanField(name="Active")
+            number_field = NumberField(name="Score")
             
             result = AND(
                 text_field.not_equals(""),
@@ -295,7 +295,7 @@ class TestIF:
     def test_if_then_else_with_complex_conditions(self):
         """Test IF/THEN/ELSE with complex conditions"""
         name_field = TextField(name="Name")
-        active_field = BoolField(name="Active")
+        active_field = BooleanField(name="Active")
         
         condition = AND(
             name_field.not_equals(""),
@@ -307,7 +307,7 @@ class TestIF:
 
     def test_if_then_else_nested(self):
         """Test nested IF statements"""
-        score_field = Number(name="Score")
+        score_field = NumberField(name="Score")
         
         inner_if = IF(score_field.greater_than(90)).THEN("A").ELSE("B")
         outer_if = IF(score_field.greater_than(95)).THEN("A+").ELSE(inner_if)
@@ -330,8 +330,8 @@ class TestIF:
     def test_if_then_else_with_all_field_types(self):
         """Test IF/THEN/ELSE with all field types"""
         text_field = TextField(name="Status")
-        bool_field = BoolField(name="Active")
-        number_field = Number(name="Count")
+        bool_field = BooleanField(name="Active")
+        number_field = NumberField(name="Count")
         attachment_field = AttachmentsField(name="Files")
         
         # Complex condition using all field types
@@ -409,8 +409,8 @@ class TestBasics:
             for name in special_names:
                 # Test all field types handle special characters
                 text_field = TextField(name=name)
-                bool_field = BoolField(name=name)
-                number_field = Number(name=name)
+                bool_field = BooleanField(name=name)
+                number_field = NumberField(name=name)
                 
                 assert text_field.equals("test") == f'{{{name}}}="test"'
                 assert bool_field.is_true() == f"{{{name}}}=TRUE()"
@@ -566,59 +566,59 @@ class TestFields:
 
         def test_list_field_contains(self):
             """Test ListField contains method (case-insensitive)"""
-            field = ListField(name="Tags")
+            field = TextListField(name="Tags")
             result = field.contains("urgent")
             assert result == 'FIND(LOWER("urgent"), LOWER({Tags}))>0'
 
         def test_list_field_not_contains(self):
             """Test ListField not_contains method (case-insensitive)"""
-            field = ListField(name="Tags")
+            field = TextListField(name="Tags")
             result = field.not_contains("urgent")
             assert result == 'FIND(LOWER("urgent"), LOWER({Tags}))=0'
 
         def test_list_field_contains_all(self):
             """Test ListField contains_all method"""
-            field = ListField(name="Skills")
+            field = TextListField(name="Skills")
             result = field.contains_all(["python", "javascript", "sql"])
             expected = 'AND(FIND(LOWER("python"), LOWER({Skills}))>0,FIND(LOWER("javascript"), LOWER({Skills}))>0,FIND(LOWER("sql"), LOWER({Skills}))>0)'
             assert result == expected
 
         def test_list_field_contains_any(self):
             """Test ListField contains_any method"""
-            field = ListField(name="Skills")
+            field = TextListField(name="Skills")
             result = field.contains_any(["python", "javascript", "sql"])
             expected = 'OR(FIND(LOWER("python"), LOWER({Skills}))>0,FIND(LOWER("javascript"), LOWER({Skills}))>0,FIND(LOWER("sql"), LOWER({Skills}))>0)'
             assert result == expected
 
         def test_list_field_contains_all_single_item(self):
             """Test ListField contains_all with single item"""
-            field = ListField(name="Categories")
+            field = TextListField(name="Categories")
             result = field.contains_all(["business"])
             expected = 'AND(FIND(LOWER("business"), LOWER({Categories}))>0)'
             assert result == expected
 
         def test_list_field_contains_any_single_item(self):
             """Test ListField contains_any with single item"""
-            field = ListField(name="Categories")
+            field = TextListField(name="Categories")
             result = field.contains_any(["business"])
             expected = 'OR(FIND(LOWER("business"), LOWER({Categories}))>0)'
             assert result == expected
 
         def test_list_field_contains_all_empty_list(self):
             """Test ListField contains_all with empty list"""
-            field = ListField(name="Empty")
+            field = TextListField(name="Empty")
             result = field.contains_all([])
             assert result == "AND()"
 
         def test_list_field_contains_any_empty_list(self):
             """Test ListField contains_any with empty list"""
-            field = ListField(name="Empty")
+            field = TextListField(name="Empty")
             result = field.contains_any([])
             assert result == "OR()"
 
         def test_list_field_with_special_characters(self):
             """Test ListField with special characters in values"""
-            field = ListField(name="Data")
+            field = TextListField(name="Data")
             
             # Test with spaces
             result = field.contains("web development")
@@ -630,7 +630,7 @@ class TestFields:
 
         def test_list_field_inheritance(self):
             """Test ListField inherits from Field"""
-            field = ListField(name="TestList")
+            field = TextListField(name="TestList")
             
             # Test inherited methods
             assert field.is_empty() == "{TestList}=BLANK()"
@@ -639,7 +639,7 @@ class TestFields:
 
         def test_list_field_case_insensitive(self):
             """Test ListField case insensitive behavior"""
-            field = ListField(name="Items")
+            field = TextListField(name="Items")
             
             # Test with mixed case
             result = field.contains("Python")
@@ -651,7 +651,7 @@ class TestFields:
         
         def test_list_field_with_large_lists(self):
             """Test ListField with large lists"""
-            field = ListField(name="BigList")
+            field = TextListField(name="BigList")
             large_list = [f"item{i}" for i in range(5)]  # Reduced to 5 for cleaner test
             
             result = field.contains_all(large_list)
@@ -667,55 +667,55 @@ class TestFields:
 
         def test_number_field_equals_int(self):
             """Test Number field equals with integer"""
-            field = Number(name="Score")
+            field = NumberField(name="Score")
             result = field.equals(100)
             assert result == "{Score}=100"
 
         def test_number_field_equals_float(self):
             """Test Number field equals with float"""
-            field = Number(name="Price")
+            field = NumberField(name="Price")
             result = field.equals(99.99)
             assert result == "{Price}=99.99"
 
         def test_number_field_not_equals_int(self):
             """Test Number field not_equals with integer"""
-            field = Number(name="Score")
+            field = NumberField(name="Score")
             result = field.not_equals(0)
             assert result == "{Score}!=0"
 
         def test_number_field_not_equals_float(self):
             """Test Number field not_equals with float"""
-            field = Number(name="Price")
+            field = NumberField(name="Price")
             result = field.not_equals(0.0)
             assert result == "{Price}!=0.0"
 
         def test_number_field_greater_than(self):
             """Test Number field greater_than method"""
-            field = Number(name="Age")
+            field = NumberField(name="Age")
             result = field.greater_than(18)
             assert result == "{Age}>18"
 
         def test_number_field_less_than(self):
             """Test Number field less_than method"""
-            field = Number(name="Age")
+            field = NumberField(name="Age")
             result = field.less_than(65)
             assert result == "{Age}<65"
 
         def test_number_field_greater_than_or_equals(self):
             """Test Number field greater_than_or_equals method"""
-            field = Number(name="Grade")
+            field = NumberField(name="Grade")
             result = field.greater_than_or_equals(70)
             assert result == "{Grade}>=70"
 
         def test_number_field_less_than_or_equals(self):
             """Test Number field less_than_or_equals method"""
-            field = Number(name="Grade")
+            field = NumberField(name="Grade")
             result = field.less_than_or_equals(100)
             assert result == "{Grade}<=100"
 
         def test_number_field_with_negative_numbers(self):
             """Test Number field with negative numbers"""
-            field = Number(name="Temperature")
+            field = NumberField(name="Temperature")
             
             assert field.equals(-10) == "{Temperature}=-10"
             assert field.greater_than(-5) == "{Temperature}>-5"
@@ -723,7 +723,7 @@ class TestFields:
 
         def test_number_field_with_zero(self):
             """Test Number field with zero"""
-            field = Number(name="Count")
+            field = NumberField(name="Count")
             
             assert field.equals(0) == "{Count}=0"
             assert field.not_equals(0) == "{Count}!=0"
@@ -732,21 +732,21 @@ class TestFields:
 
         def test_number_field_with_large_numbers(self):
             """Test Number field with large numbers"""
-            field = Number(name="Population")
+            field = NumberField(name="Population")
             
             assert field.equals(1000000) == "{Population}=1000000"
             assert field.greater_than(999999) == "{Population}>999999"
 
         def test_number_field_with_decimal_precision(self):
             """Test Number field with decimal precision"""
-            field = Number(name="Precision")
+            field = NumberField(name="Precision")
             
             assert field.equals(3.14159) == "{Precision}=3.14159"
             assert field.greater_than(0.001) == "{Precision}>0.001"
 
         def test_number_field_inheritance(self):
             """Test Number field inherits from Field"""
-            field = Number(name="TestNumber")
+            field = NumberField(name="TestNumber")
             
             # Test inherited methods
             assert field.is_empty() == "{TestNumber}=BLANK()"
@@ -755,7 +755,7 @@ class TestFields:
 
         def test_number_field_compare_method(self):
             """Test Number field _compare method indirectly"""
-            field = Number(name="Value")
+            field = NumberField(name="Value")
             
             # Test all comparison operators
             assert field._compare("=", 10) == "{Value}=10"
@@ -767,7 +767,7 @@ class TestFields:
         
         def test_number_field_with_extreme_values(self):
             """Test Number field with extreme values"""
-            field = Number(name="Extreme")
+            field = NumberField(name="Extreme")
             
             # Test very large numbers
             assert field.equals(999999999999) == "{Extreme}=999999999999"
@@ -784,31 +784,31 @@ class TestFields:
 
         def test_bool_field_equals_true(self):
             """Test BoolField equals with True"""
-            field = BoolField(name="IsActive")
+            field = BooleanField(name="IsActive")
             result = field.equals(True)
             assert result == "{IsActive}=TRUE()"
 
         def test_bool_field_equals_false(self):
             """Test BoolField equals with False"""
-            field = BoolField(name="IsActive")
+            field = BooleanField(name="IsActive")
             result = field.equals(False)
             assert result == "{IsActive}=FALSE()"
 
         def test_bool_field_is_true(self):
             """Test BoolField is_true method"""
-            field = BoolField(name="Verified")
+            field = BooleanField(name="Verified")
             result = field.is_true()
             assert result == "{Verified}=TRUE()"
 
         def test_bool_field_is_false(self):
             """Test BoolField is_false method"""
-            field = BoolField(name="Verified")
+            field = BooleanField(name="Verified")
             result = field.is_false()
             assert result == "{Verified}=FALSE()"
 
         def test_bool_field_inheritance(self):
             """Test BoolField inherits from Field"""
-            field = BoolField(name="TestBool")
+            field = BooleanField(name="TestBool")
             
             # Test inherited methods
             assert field.is_empty() == "{TestBool}=BLANK()"
@@ -818,10 +818,10 @@ class TestFields:
         def test_bool_field_with_different_names(self):
             """Test BoolField with different field names"""
             fields = [
-                BoolField(name="Active"),
-                BoolField(name="Is Published"),
-                BoolField(name="has_permissions"),
-                BoolField(name="Flag-123")
+                BooleanField(name="Active"),
+                BooleanField(name="Is Published"),
+                BooleanField(name="has_permissions"),
+                BooleanField(name="Flag-123")
             ]
             
             for field in fields:
@@ -830,7 +830,7 @@ class TestFields:
 
         def test_bool_field_equals_method_behavior(self):
             """Test BoolField equals method with different boolean values"""
-            field = BoolField(name="Status")
+            field = BooleanField(name="Status")
             
             # Test with explicit boolean values
             assert field.equals(True) == "{Status}=TRUE()"
@@ -838,8 +838,8 @@ class TestFields:
 
         def test_bool_field_in_logical_operations(self):
             """Test BoolField in logical operations"""
-            active_field = BoolField(name="Active")
-            verified_field = BoolField(name="Verified")
+            active_field = BooleanField(name="Active")
+            verified_field = BooleanField(name="Verified")
             
             # Test with AND
             result = AND(active_field.is_true(), verified_field.is_true())
@@ -1805,8 +1805,8 @@ class TestCrossComponentIntegration:
         """Test a real-world user validation formula"""
         name_field = TextField(name="Name")
         email_field = TextField(name="Email")
-        age_field = Number(name="Age")
-        active_field = BoolField(name="Active")
+        age_field = NumberField(name="Age")
+        active_field = BooleanField(name="Active")
         
         # Complex validation: name not empty, valid email, adult age, and active
         validation = AND(
@@ -1842,9 +1842,9 @@ class TestCrossComponentIntegration:
     def test_e_commerce_product_filtering(self):
         """Test e-commerce product filtering with multiple field types"""
         name_field = TextField(name="Product Name")
-        price_field = Number(name="Price")
-        category_field = ListField(name="Categories")
-        in_stock_field = BoolField(name="In Stock")
+        price_field = NumberField(name="Price")
+        category_field = TextListField(name="Categories")
+        in_stock_field = BooleanField(name="In Stock")
         images_field = AttachmentsField(name="Images")
         
         # Find products: name contains "laptop", price under $2000, in electronics category, in stock, has images
@@ -1863,10 +1863,10 @@ class TestCrossComponentIntegration:
     def test_employee_bonus_calculation(self):
         """Test employee bonus calculation with multiple conditions"""
         performance_field = TextField(name="Performance Rating")
-        salary_field = Number(name="Salary")
-        years_field = Number(name="Years of Service")
-        department_field = ListField(name="Department")
-        active_field = BoolField(name="Active")
+        salary_field = NumberField(name="Salary")
+        years_field = NumberField(name="Years of Service")
+        department_field = TextListField(name="Department")
+        active_field = BooleanField(name="Active")
         
         # Bonus eligible: excellent performance, salary under 100k, 2+ years service, in sales/engineering, active
         bonus_eligible = AND(
@@ -1886,7 +1886,7 @@ class TestCrossComponentIntegration:
         venue_field = TextField(name="Venue")
         status_field = TextField(name="Status")
         materials_field = AttachmentsField(name="Materials")
-        registrations_field = Number(name="Registrations")
+        registrations_field = NumberField(name="Registrations")
         
         # Event ready: venue confirmed, approved status, has exactly 3 materials, not overbooked
         event_ready = AND(
@@ -1905,8 +1905,8 @@ class TestCrossComponentIntegration:
         title_field = TextField(name="Title")
         content_field = TextField(name="Content")
         author_field = TextField(name="Author")
-        tags_field = ListField(name="Tags")
-        flagged_field = BoolField(name="Flagged")
+        tags_field = TextListField(name="Tags")
+        flagged_field = BooleanField(name="Flagged")
         
         # Content approval: title not empty, content doesn't contain banned words, author verified, appropriate tags, not flagged
         content_approved = AND(
@@ -1928,9 +1928,9 @@ class TestCrossComponentIntegration:
 
     def test_inventory_management_with_dates(self):
         """Test inventory management with expiration dates"""
-        quantity_field = Number(name="Quantity")
+        quantity_field = NumberField(name="Quantity")
         location_field = TextField(name="Location")
-        category_field = ListField(name="Category")
+        category_field = TextListField(name="Category")
         
         # Item needs attention: low quantity OR in restricted location OR perishable
         simplified_attention = OR(
@@ -1945,11 +1945,11 @@ class TestCrossComponentIntegration:
 
     def test_customer_segmentation_advanced(self):
         """Test advanced customer segmentation"""
-        purchase_count = Number(name="Purchase Count")
-        total_spent = Number(name="Total Spent")
+        purchase_count = NumberField(name="Purchase Count")
+        total_spent = NumberField(name="Total Spent")
         customer_type = TextField(name="Customer Type")
-        preferences = ListField(name="Preferences")
-        vip_status = BoolField(name="VIP")
+        preferences = TextListField(name="Preferences")
+        vip_status = BooleanField(name="VIP")
         
         # VIP Customer: many purchases, high spending, premium type, luxury preferences, or already VIP
         vip_customer = OR(
