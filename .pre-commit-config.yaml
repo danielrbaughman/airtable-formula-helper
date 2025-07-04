@@ -1,0 +1,21 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: Linter
+        entry: ruff check
+        language: system
+        types: [python]
+        pass_filenames: true
+      - id: ty-check
+        name: Type Check
+        entry: ty check
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: pytest
+        name: Unit Tests
+        entry: .venv/bin/python -m pytest || (echo "Unit tests failed"; exit 1)
+        language: system
+        pass_filenames: false
+        always_run: true

@@ -1,0 +1,37 @@
+[project]
+name = "airtableformulahelpers"
+version = "0.0.0"
+description = "Utilities for generating Airtable formulas"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[dependency-groups]
+dev = [
+    "dotenv>=0.9.9",
+    "pre-commit>=4.2.0",
+    "pytest>=8.4.1",
+    "ruff>=0.12.1",
+    "ty>=0.0.1a12",
+    "typer>=0.16.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+extend-select = ["I", "N"]
+
+[tool.ruff.format]
+skip-magic-trailing-comma = false
