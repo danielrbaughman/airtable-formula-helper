@@ -31,7 +31,26 @@ def NOT(*args: str) -> str:  # noqa: N802
     return f"NOT({','.join(args)})"
 
 
-def IF(condition: str, true_value: str, false_value: str) -> str:  # noqa: N802
+def IF(condition: str) -> "THEN":  # noqa: N802
+    """Start an IF statement."""
+    return THEN(condition=condition)
+
+
+class THEN(BaseModel):
+    condition: str
+
+    def THEN(self, value_if_true: str) -> "ELSE":  # noqa: N802
+        return ELSE(condition=self.condition, true_value=value_if_true)
+
+
+class ELSE(THEN):
+    true_value: str
+
+    def ELSE(self, value_if_false: str) -> str:  # noqa: N802
+        return f"IF({self.condition}, {self.true_value}, {value_if_false})"
+
+
+def _IF(condition: str, true_value: str, false_value: str) -> str:  # noqa: N802
     return f"IF({condition}, {true_value}, {false_value})"
 
 
@@ -44,6 +63,9 @@ class Field(BaseModel):
 
     def is_empty(self) -> str:
         return f"{{{self.name}}}=BLANK()"
+    
+    def is_not_empty(self) -> str:
+        return f"{{{self.name}}}"
 
 
 class TextField(Field):

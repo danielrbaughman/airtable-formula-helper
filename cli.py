@@ -1,7 +1,7 @@
 import typer
 from rich import print
 
-from airtableformulahelpers import AND, NOT, OR, BoolField, DateField, TextField, ListField
+from airtableformulahelpers import AND, IF, NOT, OR, BoolField, DateField, ListField, TextField
 
 app = typer.Typer(rich_markup_mode="markdown")
 
@@ -25,10 +25,14 @@ def main():
             DateField(name="field13").is_on("2023-10-01T12:00:00Z"),
             DateField(name="field14").is_before().days_ago(30),
             DateField(name="field14").is_before("today"),
-            OR(
-                DateField(name="field15").is_on_or_after().days_ago(7),
-                DateField(name="field16").is_on_or_after("2023-10-01"),
-            ),
+            IF(
+                OR(
+                    DateField(name="field15").is_on_or_after().days_ago(7),
+                    DateField(name="field16").is_on_or_after("2023-10-01"),
+                ),
+            )
+            .THEN("true_value")
+            .ELSE("false_value"),
         ),
     )
     print(formula)
