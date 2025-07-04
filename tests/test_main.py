@@ -1177,6 +1177,626 @@ class TestFields:
                     comparison = DateComparison(name="TestField", compare=op)
                     result = comparison.days_ago(10)
                     assert result == f"DATETIME_DIFF(NOW(), {{TestField}}, 'days'){op}10"
+        
+        class TestDateFieldChaining:
+            """Comprehensive tests for DateField chaining to DateComparison operations"""
+
+            def test_date_field_is_on_chaining_basic(self):
+                """Test basic DateField.is_on() chaining"""
+                field = DateField(name="field12")
+                result = field.is_on()
+                assert isinstance(result, DateComparison)
+                assert result.name == "field12"
+                assert result.compare == "="
+
+            def test_date_field_is_before_chaining_basic(self):
+                """Test basic DateField.is_before() chaining"""
+                field = DateField(name="field14")
+                result = field.is_before()
+                assert isinstance(result, DateComparison)
+                assert result.name == "field14"
+                assert result.compare == ">"
+
+            def test_date_field_is_after_chaining_basic(self):
+                """Test basic DateField.is_after() chaining"""
+                field = DateField(name="field15")
+                result = field.is_after()
+                assert isinstance(result, DateComparison)
+                assert result.name == "field15"
+                assert result.compare == "<"
+
+            def test_date_field_is_on_or_before_chaining_basic(self):
+                """Test basic DateField.is_on_or_before() chaining"""
+                field = DateField(name="field16")
+                result = field.is_on_or_before()
+                assert isinstance(result, DateComparison)
+                assert result.name == "field16"
+                assert result.compare == "<="
+
+            def test_date_field_is_on_or_after_chaining_basic(self):
+                """Test basic DateField.is_on_or_after() chaining"""
+                field = DateField(name="field17")
+                result = field.is_on_or_after()
+                assert isinstance(result, DateComparison)
+                assert result.name == "field17"
+                assert result.compare == ">="
+
+            def test_date_field_is_not_on_chaining_basic(self):
+                """Test basic DateField.is_not_on() chaining"""
+                field = DateField(name="field18")
+                result = field.is_not_on()
+                assert isinstance(result, DateComparison)
+                assert result.name == "field18"
+                assert result.compare == "!="
+
+            # is_on() chaining tests with all time units
+            def test_date_field_is_on_chaining_milliseconds_ago(self):
+                """Test DateField.is_on().milliseconds_ago() chaining"""
+                field = DateField(name="field12")
+                result = field.is_on().milliseconds_ago(500)
+                assert result == "DATETIME_DIFF(NOW(), {field12}, 'milliseconds')=500"
+
+            def test_date_field_is_on_chaining_seconds_ago(self):
+                """Test DateField.is_on().seconds_ago() chaining"""
+                field = DateField(name="field12")
+                result = field.is_on().seconds_ago(30)
+                assert result == "DATETIME_DIFF(NOW(), {field12}, 'seconds')=30"
+
+            def test_date_field_is_on_chaining_minutes_ago(self):
+                """Test DateField.is_on().minutes_ago() chaining"""
+                field = DateField(name="field12")
+                result = field.is_on().minutes_ago(15)
+                assert result == "DATETIME_DIFF(NOW(), {field12}, 'minutes')=15"
+
+            def test_date_field_is_on_chaining_hours_ago(self):
+                """Test DateField.is_on().hours_ago() chaining"""
+                field = DateField(name="field12")
+                result = field.is_on().hours_ago(4)
+                assert result == "DATETIME_DIFF(NOW(), {field12}, 'hours')=4"
+
+            def test_date_field_is_on_chaining_days_ago(self):
+                """Test DateField.is_on().days_ago() chaining"""
+                field = DateField(name="field12")
+                result = field.is_on().days_ago(7)
+                assert result == "DATETIME_DIFF(NOW(), {field12}, 'days')=7"
+
+            def test_date_field_is_on_chaining_weeks_ago(self):
+                """Test DateField.is_on().weeks_ago() chaining"""
+                field = DateField(name="field12")
+                result = field.is_on().weeks_ago(2)
+                assert result == "DATETIME_DIFF(NOW(), {field12}, 'weeks')=2"
+
+            def test_date_field_is_on_chaining_months_ago(self):
+                """Test DateField.is_on().months_ago() chaining"""
+                field = DateField(name="field12")
+                result = field.is_on().months_ago(3)
+                assert result == "DATETIME_DIFF(NOW(), {field12}, 'months')=3"
+
+            def test_date_field_is_on_chaining_quarters_ago(self):
+                """Test DateField.is_on().quarters_ago() chaining"""
+                field = DateField(name="field12")
+                result = field.is_on().quarters_ago(1)
+                assert result == "DATETIME_DIFF(NOW(), {field12}, 'quarters')=1"
+
+            def test_date_field_is_on_chaining_years_ago(self):
+                """Test DateField.is_on().years_ago() chaining"""
+                field = DateField(name="field12")
+                result = field.is_on().years_ago(2)
+                assert result == "DATETIME_DIFF(NOW(), {field12}, 'years')=2"
+
+            # is_before() chaining tests with all time units
+            def test_date_field_is_before_chaining_milliseconds_ago(self):
+                """Test DateField.is_before().milliseconds_ago() chaining"""
+                field = DateField(name="field14")
+                result = field.is_before().milliseconds_ago(100)
+                assert result == "DATETIME_DIFF(NOW(), {field14}, 'milliseconds')>100"
+
+            def test_date_field_is_before_chaining_seconds_ago(self):
+                """Test DateField.is_before().seconds_ago() chaining"""
+                field = DateField(name="field14")
+                result = field.is_before().seconds_ago(45)
+                assert result == "DATETIME_DIFF(NOW(), {field14}, 'seconds')>45"
+
+            def test_date_field_is_before_chaining_minutes_ago(self):
+                """Test DateField.is_before().minutes_ago() chaining"""
+                field = DateField(name="field14")
+                result = field.is_before().minutes_ago(30)
+                assert result == "DATETIME_DIFF(NOW(), {field14}, 'minutes')>30"
+
+            def test_date_field_is_before_chaining_hours_ago(self):
+                """Test DateField.is_before().hours_ago() chaining"""
+                field = DateField(name="field14")
+                result = field.is_before().hours_ago(6)
+                assert result == "DATETIME_DIFF(NOW(), {field14}, 'hours')>6"
+
+            def test_date_field_is_before_chaining_days_ago(self):
+                """Test DateField.is_before().days_ago() chaining"""
+                field = DateField(name="field14")
+                result = field.is_before().days_ago(10)
+                assert result == "DATETIME_DIFF(NOW(), {field14}, 'days')>10"
+
+            def test_date_field_is_before_chaining_weeks_ago(self):
+                """Test DateField.is_before().weeks_ago() chaining"""
+                field = DateField(name="field14")
+                result = field.is_before().weeks_ago(3)
+                assert result == "DATETIME_DIFF(NOW(), {field14}, 'weeks')>3"
+
+            def test_date_field_is_before_chaining_months_ago(self):
+                """Test DateField.is_before().months_ago() chaining"""
+                field = DateField(name="field14")
+                result = field.is_before().months_ago(6)
+                assert result == "DATETIME_DIFF(NOW(), {field14}, 'months')>6"
+
+            def test_date_field_is_before_chaining_quarters_ago(self):
+                """Test DateField.is_before().quarters_ago() chaining"""
+                field = DateField(name="field14")
+                result = field.is_before().quarters_ago(2)
+                assert result == "DATETIME_DIFF(NOW(), {field14}, 'quarters')>2"
+
+            def test_date_field_is_before_chaining_years_ago(self):
+                """Test DateField.is_before().years_ago() chaining"""
+                field = DateField(name="field14")
+                result = field.is_before().years_ago(5)
+                assert result == "DATETIME_DIFF(NOW(), {field14}, 'years')>5"
+
+            # is_after() chaining tests with all time units
+            def test_date_field_is_after_chaining_milliseconds_ago(self):
+                """Test DateField.is_after().milliseconds_ago() chaining"""
+                field = DateField(name="field15")
+                result = field.is_after().milliseconds_ago(250)
+                assert result == "DATETIME_DIFF(NOW(), {field15}, 'milliseconds')<250"
+
+            def test_date_field_is_after_chaining_seconds_ago(self):
+                """Test DateField.is_after().seconds_ago() chaining"""
+                field = DateField(name="field15")
+                result = field.is_after().seconds_ago(120)
+                assert result == "DATETIME_DIFF(NOW(), {field15}, 'seconds')<120"
+
+            def test_date_field_is_after_chaining_minutes_ago(self):
+                """Test DateField.is_after().minutes_ago() chaining"""
+                field = DateField(name="field15")
+                result = field.is_after().minutes_ago(45)
+                assert result == "DATETIME_DIFF(NOW(), {field15}, 'minutes')<45"
+
+            def test_date_field_is_after_chaining_hours_ago(self):
+                """Test DateField.is_after().hours_ago() chaining"""
+                field = DateField(name="field15")
+                result = field.is_after().hours_ago(8)
+                assert result == "DATETIME_DIFF(NOW(), {field15}, 'hours')<8"
+
+            def test_date_field_is_after_chaining_days_ago(self):
+                """Test DateField.is_after().days_ago() chaining"""
+                field = DateField(name="field15")
+                result = field.is_after().days_ago(14)
+                assert result == "DATETIME_DIFF(NOW(), {field15}, 'days')<14"
+
+            def test_date_field_is_after_chaining_weeks_ago(self):
+                """Test DateField.is_after().weeks_ago() chaining"""
+                field = DateField(name="field15")
+                result = field.is_after().weeks_ago(4)
+                assert result == "DATETIME_DIFF(NOW(), {field15}, 'weeks')<4"
+
+            def test_date_field_is_after_chaining_months_ago(self):
+                """Test DateField.is_after().months_ago() chaining"""
+                field = DateField(name="field15")
+                result = field.is_after().months_ago(9)
+                assert result == "DATETIME_DIFF(NOW(), {field15}, 'months')<9"
+
+            def test_date_field_is_after_chaining_quarters_ago(self):
+                """Test DateField.is_after().quarters_ago() chaining"""
+                field = DateField(name="field15")
+                result = field.is_after().quarters_ago(3)
+                assert result == "DATETIME_DIFF(NOW(), {field15}, 'quarters')<3"
+
+            def test_date_field_is_after_chaining_years_ago(self):
+                """Test DateField.is_after().years_ago() chaining"""
+                field = DateField(name="field15")
+                result = field.is_after().years_ago(10)
+                assert result == "DATETIME_DIFF(NOW(), {field15}, 'years')<10"
+
+            # is_on_or_before() chaining tests with all time units
+            def test_date_field_is_on_or_before_chaining_milliseconds_ago(self):
+                """Test DateField.is_on_or_before().milliseconds_ago() chaining"""
+                field = DateField(name="field16")
+                result = field.is_on_or_before().milliseconds_ago(75)
+                assert result == "DATETIME_DIFF(NOW(), {field16}, 'milliseconds')<=75"
+
+            def test_date_field_is_on_or_before_chaining_seconds_ago(self):
+                """Test DateField.is_on_or_before().seconds_ago() chaining"""
+                field = DateField(name="field16")
+                result = field.is_on_or_before().seconds_ago(90)
+                assert result == "DATETIME_DIFF(NOW(), {field16}, 'seconds')<=90"
+
+            def test_date_field_is_on_or_before_chaining_minutes_ago(self):
+                """Test DateField.is_on_or_before().minutes_ago() chaining"""
+                field = DateField(name="field16")
+                result = field.is_on_or_before().minutes_ago(60)
+                assert result == "DATETIME_DIFF(NOW(), {field16}, 'minutes')<=60"
+
+            def test_date_field_is_on_or_before_chaining_hours_ago(self):
+                """Test DateField.is_on_or_before().hours_ago() chaining"""
+                field = DateField(name="field16")
+                result = field.is_on_or_before().hours_ago(12)
+                assert result == "DATETIME_DIFF(NOW(), {field16}, 'hours')<=12"
+
+            def test_date_field_is_on_or_before_chaining_days_ago(self):
+                """Test DateField.is_on_or_before().days_ago() chaining"""
+                field = DateField(name="field16")
+                result = field.is_on_or_before().days_ago(21)
+                assert result == "DATETIME_DIFF(NOW(), {field16}, 'days')<=21"
+
+            def test_date_field_is_on_or_before_chaining_weeks_ago(self):
+                """Test DateField.is_on_or_before().weeks_ago() chaining"""
+                field = DateField(name="field16")
+                result = field.is_on_or_before().weeks_ago(5)
+                assert result == "DATETIME_DIFF(NOW(), {field16}, 'weeks')<=5"
+
+            def test_date_field_is_on_or_before_chaining_months_ago(self):
+                """Test DateField.is_on_or_before().months_ago() chaining"""
+                field = DateField(name="field16")
+                result = field.is_on_or_before().months_ago(12)
+                assert result == "DATETIME_DIFF(NOW(), {field16}, 'months')<=12"
+
+            def test_date_field_is_on_or_before_chaining_quarters_ago(self):
+                """Test DateField.is_on_or_before().quarters_ago() chaining"""
+                field = DateField(name="field16")
+                result = field.is_on_or_before().quarters_ago(4)
+                assert result == "DATETIME_DIFF(NOW(), {field16}, 'quarters')<=4"
+
+            def test_date_field_is_on_or_before_chaining_years_ago(self):
+                """Test DateField.is_on_or_before().years_ago() chaining"""
+                field = DateField(name="field16")
+                result = field.is_on_or_before().years_ago(25)
+                assert result == "DATETIME_DIFF(NOW(), {field16}, 'years')<=25"
+
+            # is_on_or_after() chaining tests with all time units
+            def test_date_field_is_on_or_after_chaining_milliseconds_ago(self):
+                """Test DateField.is_on_or_after().milliseconds_ago() chaining"""
+                field = DateField(name="field17")
+                result = field.is_on_or_after().milliseconds_ago(150)
+                assert result == "DATETIME_DIFF(NOW(), {field17}, 'milliseconds')>=150"
+
+            def test_date_field_is_on_or_after_chaining_seconds_ago(self):
+                """Test DateField.is_on_or_after().seconds_ago() chaining"""
+                field = DateField(name="field17")
+                result = field.is_on_or_after().seconds_ago(180)
+                assert result == "DATETIME_DIFF(NOW(), {field17}, 'seconds')>=180"
+
+            def test_date_field_is_on_or_after_chaining_minutes_ago(self):
+                """Test DateField.is_on_or_after().minutes_ago() chaining"""
+                field = DateField(name="field17")
+                result = field.is_on_or_after().minutes_ago(90)
+                assert result == "DATETIME_DIFF(NOW(), {field17}, 'minutes')>=90"
+
+            def test_date_field_is_on_or_after_chaining_hours_ago(self):
+                """Test DateField.is_on_or_after().hours_ago() chaining"""
+                field = DateField(name="field17")
+                result = field.is_on_or_after().hours_ago(18)
+                assert result == "DATETIME_DIFF(NOW(), {field17}, 'hours')>=18"
+
+            def test_date_field_is_on_or_after_chaining_days_ago(self):
+                """Test DateField.is_on_or_after().days_ago() chaining"""
+                field = DateField(name="field17")
+                result = field.is_on_or_after().days_ago(28)
+                assert result == "DATETIME_DIFF(NOW(), {field17}, 'days')>=28"
+
+            def test_date_field_is_on_or_after_chaining_weeks_ago(self):
+                """Test DateField.is_on_or_after().weeks_ago() chaining"""
+                field = DateField(name="field17")
+                result = field.is_on_or_after().weeks_ago(6)
+                assert result == "DATETIME_DIFF(NOW(), {field17}, 'weeks')>=6"
+
+            def test_date_field_is_on_or_after_chaining_months_ago(self):
+                """Test DateField.is_on_or_after().months_ago() chaining"""
+                field = DateField(name="field17")
+                result = field.is_on_or_after().months_ago(18)
+                assert result == "DATETIME_DIFF(NOW(), {field17}, 'months')>=18"
+
+            def test_date_field_is_on_or_after_chaining_quarters_ago(self):
+                """Test DateField.is_on_or_after().quarters_ago() chaining"""
+                field = DateField(name="field17")
+                result = field.is_on_or_after().quarters_ago(7)
+                assert result == "DATETIME_DIFF(NOW(), {field17}, 'quarters')>=7"
+
+            def test_date_field_is_on_or_after_chaining_years_ago(self):
+                """Test DateField.is_on_or_after().years_ago() chaining"""
+                field = DateField(name="field17")
+                result = field.is_on_or_after().years_ago(50)
+                assert result == "DATETIME_DIFF(NOW(), {field17}, 'years')>=50"
+
+            # is_not_on() chaining tests with all time units
+            def test_date_field_is_not_on_chaining_milliseconds_ago(self):
+                """Test DateField.is_not_on().milliseconds_ago() chaining"""
+                field = DateField(name="field18")
+                result = field.is_not_on().milliseconds_ago(200)
+                assert result == "DATETIME_DIFF(NOW(), {field18}, 'milliseconds')!=200"
+
+            def test_date_field_is_not_on_chaining_seconds_ago(self):
+                """Test DateField.is_not_on().seconds_ago() chaining"""
+                field = DateField(name="field18")
+                result = field.is_not_on().seconds_ago(300)
+                assert result == "DATETIME_DIFF(NOW(), {field18}, 'seconds')!=300"
+
+            def test_date_field_is_not_on_chaining_minutes_ago(self):
+                """Test DateField.is_not_on().minutes_ago() chaining"""
+                field = DateField(name="field18")
+                result = field.is_not_on().minutes_ago(120)
+                assert result == "DATETIME_DIFF(NOW(), {field18}, 'minutes')!=120"
+
+            def test_date_field_is_not_on_chaining_hours_ago(self):
+                """Test DateField.is_not_on().hours_ago() chaining"""
+                field = DateField(name="field18")
+                result = field.is_not_on().hours_ago(24)
+                assert result == "DATETIME_DIFF(NOW(), {field18}, 'hours')!=24"
+
+            def test_date_field_is_not_on_chaining_days_ago(self):
+                """Test DateField.is_not_on().days_ago() chaining"""
+                field = DateField(name="field18")
+                result = field.is_not_on().days_ago(35)
+                assert result == "DATETIME_DIFF(NOW(), {field18}, 'days')!=35"
+
+            def test_date_field_is_not_on_chaining_weeks_ago(self):
+                """Test DateField.is_not_on().weeks_ago() chaining"""
+                field = DateField(name="field18")
+                result = field.is_not_on().weeks_ago(8)
+                assert result == "DATETIME_DIFF(NOW(), {field18}, 'weeks')!=8"
+
+            def test_date_field_is_not_on_chaining_months_ago(self):
+                """Test DateField.is_not_on().months_ago() chaining"""
+                field = DateField(name="field18")
+                result = field.is_not_on().months_ago(24)
+                assert result == "DATETIME_DIFF(NOW(), {field18}, 'months')!=24"
+
+            def test_date_field_is_not_on_chaining_quarters_ago(self):
+                """Test DateField.is_not_on().quarters_ago() chaining"""
+                field = DateField(name="field18")
+                result = field.is_not_on().quarters_ago(8)
+                assert result == "DATETIME_DIFF(NOW(), {field18}, 'quarters')!=8"
+
+            def test_date_field_is_not_on_chaining_years_ago(self):
+                """Test DateField.is_not_on().years_ago() chaining"""
+                field = DateField(name="field18")
+                result = field.is_not_on().years_ago(100)
+                assert result == "DATETIME_DIFF(NOW(), {field18}, 'years')!=100"
+
+            # Edge case tests
+            def test_date_field_chaining_with_zero_values(self):
+                """Test DateField chaining with zero values"""
+                field = DateField(name="TestField")
+                
+                # Test zero values for all time units
+                assert field.is_on().milliseconds_ago(0) == "DATETIME_DIFF(NOW(), {TestField}, 'milliseconds')=0"
+                assert field.is_before().seconds_ago(0) == "DATETIME_DIFF(NOW(), {TestField}, 'seconds')>0"
+                assert field.is_after().minutes_ago(0) == "DATETIME_DIFF(NOW(), {TestField}, 'minutes')<0"
+                assert field.is_on_or_before().hours_ago(0) == "DATETIME_DIFF(NOW(), {TestField}, 'hours')<=0"
+                assert field.is_on_or_after().days_ago(0) == "DATETIME_DIFF(NOW(), {TestField}, 'days')>=0"
+                assert field.is_not_on().weeks_ago(0) == "DATETIME_DIFF(NOW(), {TestField}, 'weeks')!=0"
+
+            def test_date_field_chaining_with_negative_values(self):
+                """Test DateField chaining with negative values (future dates)"""
+                field = DateField(name="FutureField")
+                
+                # Test negative values for all time units
+                assert field.is_on().days_ago(-7) == "DATETIME_DIFF(NOW(), {FutureField}, 'days')=-7"
+                assert field.is_before().weeks_ago(-2) == "DATETIME_DIFF(NOW(), {FutureField}, 'weeks')>-2"
+                assert field.is_after().months_ago(-3) == "DATETIME_DIFF(NOW(), {FutureField}, 'months')<-3"
+                assert field.is_on_or_before().years_ago(-1) == "DATETIME_DIFF(NOW(), {FutureField}, 'years')<=-1"
+                assert field.is_on_or_after().hours_ago(-24) == "DATETIME_DIFF(NOW(), {FutureField}, 'hours')>=-24"
+                assert field.is_not_on().minutes_ago(-60) == "DATETIME_DIFF(NOW(), {FutureField}, 'minutes')!=-60"
+
+            def test_date_field_chaining_with_large_values(self):
+                """Test DateField chaining with large values"""
+                field = DateField(name="LargeField")
+                
+                # Test large values
+                assert field.is_on().milliseconds_ago(1000000) == "DATETIME_DIFF(NOW(), {LargeField}, 'milliseconds')=1000000"
+                assert field.is_before().seconds_ago(86400) == "DATETIME_DIFF(NOW(), {LargeField}, 'seconds')>86400"
+                assert field.is_after().minutes_ago(525600) == "DATETIME_DIFF(NOW(), {LargeField}, 'minutes')<525600"
+                assert field.is_on_or_before().hours_ago(8760) == "DATETIME_DIFF(NOW(), {LargeField}, 'hours')<=8760"
+                assert field.is_on_or_after().days_ago(365) == "DATETIME_DIFF(NOW(), {LargeField}, 'days')>=365"
+                assert field.is_not_on().years_ago(1000) == "DATETIME_DIFF(NOW(), {LargeField}, 'years')!=1000"
+
+            def test_date_field_chaining_with_very_small_milliseconds(self):
+                """Test DateField chaining with very small millisecond values"""
+                field = DateField(name="PreciseField")
+                
+                # Test very small values
+                assert field.is_on().milliseconds_ago(1) == "DATETIME_DIFF(NOW(), {PreciseField}, 'milliseconds')=1"
+                assert field.is_before().milliseconds_ago(10) == "DATETIME_DIFF(NOW(), {PreciseField}, 'milliseconds')>10"
+                assert field.is_after().milliseconds_ago(100) == "DATETIME_DIFF(NOW(), {PreciseField}, 'milliseconds')<100"
+
+            # Integration tests with logical operations
+            def test_date_field_chaining_with_and_operation(self):
+                """Test DateField chaining within AND operation"""
+                created_field = DateField(name="CreatedAt")
+                updated_field = DateField(name="UpdatedAt")
+                
+                result = AND(
+                    created_field.is_before().days_ago(30),
+                    updated_field.is_after().hours_ago(24)
+                )
+                
+                expected = "AND(DATETIME_DIFF(NOW(), {CreatedAt}, 'days')>30,DATETIME_DIFF(NOW(), {UpdatedAt}, 'hours')<24)"
+                assert result == expected
+
+            def test_date_field_chaining_with_or_operation(self):
+                """Test DateField chaining within OR operation"""
+                start_field = DateField(name="StartDate")
+                end_field = DateField(name="EndDate")
+                
+                result = OR(
+                    start_field.is_on_or_after().weeks_ago(2),
+                    end_field.is_on_or_before().months_ago(1)
+                )
+                
+                expected = "OR(DATETIME_DIFF(NOW(), {StartDate}, 'weeks')>=2,DATETIME_DIFF(NOW(), {EndDate}, 'months')<=1)"
+                assert result == expected
+
+            def test_date_field_chaining_with_not_operation(self):
+                """Test DateField chaining within NOT operation"""
+                last_login_field = DateField(name="LastLogin")
+                
+                result = NOT(last_login_field.is_on().days_ago(7))
+                
+                expected = "NOT(DATETIME_DIFF(NOW(), {LastLogin}, 'days')=7)"
+                assert result == expected
+
+            def test_date_field_chaining_with_complex_logical_operations(self):
+                """Test DateField chaining in complex logical operations"""
+                created_field = DateField(name="Created")
+                modified_field = DateField(name="Modified")
+                accessed_field = DateField(name="Accessed")
+                
+                result = AND(
+                    OR(
+                        created_field.is_before().days_ago(30),
+                        modified_field.is_after().hours_ago(12)
+                    ),
+                    NOT(accessed_field.is_on().minutes_ago(60))
+                )
+                
+                expected = "AND(OR(DATETIME_DIFF(NOW(), {Created}, 'days')>30,DATETIME_DIFF(NOW(), {Modified}, 'hours')<12),NOT(DATETIME_DIFF(NOW(), {Accessed}, 'minutes')=60))"
+                assert result == expected
+
+            # Integration tests with IF/THEN/ELSE
+            def test_date_field_chaining_with_if_then_else(self):
+                """Test DateField chaining in IF/THEN/ELSE statement"""
+                due_date_field = DateField(name="DueDate")
+                
+                result = IF(due_date_field.is_before().days_ago(7)).THEN("Overdue").ELSE("On Time")
+                
+                expected = "IF(DATETIME_DIFF(NOW(), {DueDate}, 'days')>7, Overdue, On Time)"
+                assert result == expected
+
+            def test_date_field_chaining_with_nested_if_statements(self):
+                """Test DateField chaining in nested IF statements"""
+                created_field = DateField(name="CreatedDate")
+                updated_field = DateField(name="UpdatedDate")
+                
+                inner_condition = updated_field.is_after().hours_ago(6)
+                outer_condition = created_field.is_before().days_ago(1)
+                
+                result = IF(outer_condition).THEN(
+                    IF(inner_condition).THEN("Recent Update").ELSE("Old Update")
+                ).ELSE("New Item")
+                
+                expected = "IF(DATETIME_DIFF(NOW(), {CreatedDate}, 'days')>1, IF(DATETIME_DIFF(NOW(), {UpdatedDate}, 'hours')<6, Recent Update, Old Update), New Item)"
+                assert result == expected
+
+            def test_date_field_chaining_with_multiple_conditions_in_if(self):
+                """Test DateField chaining with multiple conditions in IF statement"""
+                publish_field = DateField(name="PublishedAt")
+                expire_field = DateField(name="ExpiresAt")
+                
+                condition = AND(
+                    publish_field.is_before().days_ago(0),  # Published (negative value means in the past)
+                    expire_field.is_after().days_ago(0)     # Not expired (positive value means in the future)
+                )
+                
+                result = IF(condition).THEN("Active").ELSE("Inactive")
+                
+                expected = "IF(AND(DATETIME_DIFF(NOW(), {PublishedAt}, 'days')>0,DATETIME_DIFF(NOW(), {ExpiresAt}, 'days')<0), Active, Inactive)"
+                assert result == expected
+
+            # Real-world scenario tests
+            def test_date_field_chaining_content_freshness_check(self):
+                """Test DateField chaining for content freshness validation"""
+                created_field = DateField(name="CreatedAt")
+                updated_field = DateField(name="UpdatedAt")
+                
+                # Content is fresh if created within 7 days OR updated within 1 day
+                fresh_content = OR(
+                    created_field.is_after().days_ago(7),
+                    updated_field.is_after().days_ago(1)
+                )
+                
+                result = IF(fresh_content).THEN("Fresh").ELSE("Stale")
+                
+                expected = "IF(OR(DATETIME_DIFF(NOW(), {CreatedAt}, 'days')<7,DATETIME_DIFF(NOW(), {UpdatedAt}, 'days')<1), Fresh, Stale)"
+                assert result == expected
+
+            def test_date_field_chaining_user_activity_analysis(self):
+                """Test DateField chaining for user activity analysis"""
+                last_login_field = DateField(name="LastLogin")
+                account_created_field = DateField(name="AccountCreated")
+                
+                # User is active if logged in within 30 days AND account is older than 7 days
+                active_user = AND(
+                    last_login_field.is_after().days_ago(30),
+                    account_created_field.is_before().days_ago(7)
+                )
+                
+                result = IF(active_user).THEN("Active User").ELSE("Inactive User")
+                
+                expected = "IF(AND(DATETIME_DIFF(NOW(), {LastLogin}, 'days')<30,DATETIME_DIFF(NOW(), {AccountCreated}, 'days')>7), Active User, Inactive User)"
+                assert result == expected
+
+            def test_date_field_chaining_subscription_status(self):
+                """Test DateField chaining for subscription status check"""
+                subscription_start = DateField(name="SubscriptionStart")
+                subscription_end = DateField(name="SubscriptionEnd")
+                
+                # Subscription is active if started and not expired
+                active_subscription = AND(
+                    subscription_start.is_before().days_ago(0),  # Started (in the past)
+                    subscription_end.is_after().days_ago(0)      # Not expired (in the future)
+                )
+                
+                result = IF(active_subscription).THEN("Active Subscription").ELSE("Inactive Subscription")
+                
+                expected = "IF(AND(DATETIME_DIFF(NOW(), {SubscriptionStart}, 'days')>0,DATETIME_DIFF(NOW(), {SubscriptionEnd}, 'days')<0), Active Subscription, Inactive Subscription)"
+                assert result == expected
+
+            def test_date_field_chaining_maintenance_window(self):
+                """Test DateField chaining for maintenance window detection"""
+                last_maintenance = DateField(name="LastMaintenance")
+                
+                # Maintenance needed if last maintenance was more than 90 days ago
+                maintenance_needed = last_maintenance.is_before().days_ago(90)
+                
+                result = IF(maintenance_needed).THEN("Maintenance Required").ELSE("Maintenance OK")
+                
+                expected = "IF(DATETIME_DIFF(NOW(), {LastMaintenance}, 'days')>90, Maintenance Required, Maintenance OK)"
+                assert result == expected
+
+            def test_date_field_chaining_with_different_field_names(self):
+                """Test DateField chaining with various field name formats"""
+                # Test with different field naming conventions
+                field_names = [
+                    "Created At",           # Spaces
+                    "last_modified",        # Underscores
+                    "Date-Time",           # Hyphens
+                    "field123",            # Numbers
+                    "Event.Date",          # Dots
+                    "Date (UTC)",          # Parentheses
+                ]
+                
+                for field_name in field_names:
+                    field = DateField(name=field_name)
+                    result = field.is_on().days_ago(5)
+                    expected = f"DATETIME_DIFF(NOW(), {{{field_name}}}, 'days')=5"
+                    assert result == expected
+
+            def test_date_field_chaining_all_operators_coverage(self):
+                """Test DateField chaining covers all comparison operators"""
+                field = DateField(name="TestField")
+                
+                # Test all comparison operators are properly used
+                operators_and_methods = [
+                    ("=", field.is_on()),
+                    ("!=", field.is_not_on()),
+                    (">", field.is_before()),
+                    ("<", field.is_after()),
+                    (">=", field.is_on_or_after()),
+                    ("<=", field.is_on_or_before())
+                ]
+                
+                for expected_op, comparison_obj in operators_and_methods:
+                    assert comparison_obj.compare == expected_op
+                    result = comparison_obj.days_ago(10)
+                    assert expected_op in result
+                    assert "DATETIME_DIFF(NOW(), {TestField}, 'days')" in result
+                    assert "10" in result
 
 class TestCrossComponentIntegration:
     """Integration tests for cross-component interactions"""
