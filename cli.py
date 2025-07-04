@@ -1,9 +1,9 @@
-import typer
 from rich import print
+from typer import Typer
 
 from airtableformulahelpers import AND, IF, NOT, OR, BoolField, DateField, ListField, TextField
 
-app = typer.Typer(rich_markup_mode="markdown")
+app = Typer(rich_markup_mode="markdown")
 
 
 @app.command()
