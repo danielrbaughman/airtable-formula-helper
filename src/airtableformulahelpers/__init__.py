@@ -50,10 +50,6 @@ class ELSE(THEN):
         return f"IF({self.condition}, {self.true_value}, {value_if_false})"
 
 
-def _IF(condition: str, true_value: str, false_value: str) -> str:  # noqa: N802
-    return f"IF({condition}, {true_value}, {false_value})"
-
-
 def id_equals(id: str) -> str:
     return f"RECORD_ID()='{id}'"
 
