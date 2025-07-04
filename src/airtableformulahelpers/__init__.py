@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Optional, overload
 
 import dateparser
 from pydantic import BaseModel
@@ -160,7 +160,7 @@ class AttachmentsField(Field):
 class DateComparison(Field):
     compare: COMPARISON
 
-    def date(self, date: str | datetime) -> str:
+    def _date(self, date: str | datetime) -> str:
         if isinstance(date, datetime):
             parsed_date = date
         else:
@@ -200,20 +200,104 @@ class DateComparison(Field):
 class DateField(Field):
     """DateTime comparison formulas"""
 
+    @overload
     def is_on(self) -> DateComparison:
-        return DateComparison(name=self.name, compare="=")
+        pass
+    @overload
+    def is_on(self, date: str | datetime) -> str:
+        pass
+    def is_on(self, date: Optional[str | datetime]) -> DateComparison | str:
+        date_comparison = DateComparison(name=self.name, compare="=")
+        if date is None:
+            return date_comparison
+
+        if isinstance(date, datetime):
+            parsed_date = date
+        else:
+            parsed_date = dateparser.parse(date)
+        return date_comparison._date(parsed_date)
     
+    @overload
     def is_on_or_after(self) -> DateComparison:
-        return DateComparison(name=self.name, compare=">=")
+        pass
+    @overload
+    def is_on_or_after(self, date: str | datetime) -> str:
+        pass
+    def is_on_or_after(self, date: Optional[str | datetime] = None) -> DateComparison | str:
+        date_comparison = DateComparison(name=self.name, compare=">=")
+        if date is None:
+            return date_comparison
 
+        if isinstance(date, datetime):
+            parsed_date = date
+        else:
+            parsed_date = dateparser.parse(date)
+        return date_comparison._date(parsed_date)
+
+    @overload
     def is_on_or_before(self) -> DateComparison:
-        return DateComparison(name=self.name, compare="<=")
+        pass
+    @overload
+    def is_on_or_before(self, date: str | datetime) -> str:
+        pass
+    def is_on_or_before(self, date: Optional[str | datetime] = None) -> DateComparison | str:
+        date_comparison = DateComparison(name=self.name, compare="<=")
+        if date is None:
+            return date_comparison
 
+        if isinstance(date, datetime):
+            parsed_date = date
+        else:
+            parsed_date = dateparser.parse(date)
+        return date_comparison._date(parsed_date)
+
+    @overload
     def is_after(self) -> DateComparison:
-        return DateComparison(name=self.name, compare="<")
-    
-    def is_before(self) -> DateComparison:
-        return DateComparison(name=self.name, compare=">")
+        pass
+    @overload
+    def is_after(self, date: str | datetime) -> str:
+        pass
+    def is_after(self, date: Optional[str | datetime] = None) -> DateComparison | str:
+        date_comparison = DateComparison(name=self.name, compare="<")
+        if date is None:
+            return date_comparison
 
+        if isinstance(date, datetime):
+            parsed_date = date
+        else:
+            parsed_date = dateparser.parse(date)
+        return date_comparison._date(parsed_date)
+    
+    @overload
+    def is_before(self) -> DateComparison:
+        pass
+    @overload
+    def is_before(self, date: str | datetime) -> str:
+        pass
+    def is_before(self, date: Optional[str | datetime] = None) -> DateComparison | str:
+        date_comparison = DateComparison(name=self.name, compare=">")
+        if date is None:
+            return date_comparison
+
+        if isinstance(date, datetime):
+            parsed_date = date
+        else:
+            parsed_date = dateparser.parse(date)
+        return date_comparison._date(parsed_date)
+
+    @overload
     def is_not_on(self) -> DateComparison:
-        return DateComparison(name=self.name, compare="!=")
+        pass
+    @overload
+    def is_not_on(self, date: str | datetime) -> str:
+        pass
+    def is_not_on(self, date: Optional[str | datetime] = None) -> DateComparison | str:
+        date_comparison = DateComparison(name=self.name, compare="!=")
+        if date is None:
+            return date_comparison
+
+        if isinstance(date, datetime):
+            parsed_date = date
+        else:
+            parsed_date = dateparser.parse(date)
+        return date_comparison._date(parsed_date)
