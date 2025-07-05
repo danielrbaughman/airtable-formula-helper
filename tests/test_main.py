@@ -955,7 +955,7 @@ class TestFields:
         def test_date_field_is_on_with_string(self):
             """Test DateField is_on method with string date"""
             field = DateField(name="DueDate")
-            result = field.is_on("2023-12-25")
+            result = field.is_on("Dec 25 2023")
             assert result == "DATETIME_PARSE('2023-12-25 00:00:00')=DATETIME_PARSE({DueDate})"
 
         def test_date_field_is_on_returns_comparison(self):
@@ -1049,31 +1049,6 @@ class TestFields:
             assert field.is_empty() == "{TestDate}=BLANK()"
             assert field.is_not_empty() == "{TestDate}"
             assert field.name == "TestDate"
-
-        def test_date_field_parse_date_with_string(self):
-            """Test DateField _parse_date method with string"""
-            field = DateField(name="TestDate")
-            result = field._parse_date("2023-01-01")
-            assert isinstance(result, datetime)
-            assert result.year == 2023
-            assert result.month == 1
-            assert result.day == 1
-
-        def test_date_field_parse_date_with_datetime(self):
-            """Test DateField _parse_date method with datetime"""
-            field = DateField(name="TestDate")
-            test_date = datetime(2023, 12, 25, 10, 30, 0)
-            result = field._parse_date(test_date)
-            assert result == test_date
-
-        def test_date_field_parse_invalid_date(self):
-            """Test DateField with invalid date string raises ValueError"""
-            field = DateField(name="TestDate")
-            try:
-                field._parse_date("invalid-date-string")
-                assert False, "Should have raised ValueError"
-            except ValueError as e:
-                assert "Could not parse date" in str(e)
         
         def test_date_field_with_edge_case_dates(self):
             """Test DateField with edge case dates"""

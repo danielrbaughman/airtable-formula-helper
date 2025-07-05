@@ -175,15 +175,21 @@ class AttachmentsField(Field):
     def count_is(self, count: int) -> str:
         return f"LEN({{{self.name}}})={count}"
 
+def _parse_date(date: datetime | str) -> datetime:
+    if isinstance(date, datetime):
+        parsed_date = date
+    else:
+        result: datetime | None = dateparser.parse(date)
+        if result is None:
+            raise ValueError(f"Could not parse date: {date}")
+        parsed_date: datetime = result
+    return parsed_date
 
 class DateComparison(Field):
     compare: COMPARISON
 
     def _date(self, date: str | datetime) -> str:
-        if isinstance(date, datetime):
-            parsed_date = date
-        else:
-            parsed_date = dateparser.parse(date)
+        parsed_date = _parse_date(date)
         return f"DATETIME_PARSE('{parsed_date}'){self.compare}DATETIME_PARSE({{{self.name}}})"
 
     def _ago(self, unit: str, value: int) -> str:
@@ -216,19 +222,8 @@ class DateComparison(Field):
     def years_ago(self, years: int) -> str:
         return self._ago("years", years)
 
-
 class DateField(Field):
     """DateTime comparison formulas"""
-
-    def _parse_date(self, date: datetime | str) -> datetime:
-        if isinstance(date, datetime):
-            parsed_date = date
-        else:
-            result: datetime | None = dateparser.parse(date)
-            if result is None:
-                raise ValueError(f"Could not parse date: {date}")
-            parsed_date: datetime = result
-        return parsed_date
 
     @overload
     def is_on(self) -> DateComparison: ...
@@ -239,7 +234,7 @@ class DateField(Field):
         if date is None:
             return date_comparison
 
-        parsed_date: datetime = self._parse_date(date)
+        parsed_date: datetime = _parse_date(date)
         return date_comparison._date(parsed_date)
 
     @overload
@@ -251,7 +246,7 @@ class DateField(Field):
         if date is None:
             return date_comparison
 
-        parsed_date: datetime = self._parse_date(date)
+        parsed_date: datetime = _parse_date(date)
         return date_comparison._date(parsed_date)
 
     @overload
@@ -263,7 +258,7 @@ class DateField(Field):
         if date is None:
             return date_comparison
 
-        parsed_date: datetime = self._parse_date(date)
+        parsed_date: datetime = _parse_date(date)
         return date_comparison._date(parsed_date)
 
     @overload
@@ -275,7 +270,7 @@ class DateField(Field):
         if date is None:
             return date_comparison
 
-        parsed_date: datetime = self._parse_date(date)
+        parsed_date: datetime = _parse_date(date)
         return date_comparison._date(parsed_date)
 
     @overload
@@ -287,7 +282,7 @@ class DateField(Field):
         if date is None:
             return date_comparison
 
-        parsed_date: datetime = self._parse_date(date)
+        parsed_date: datetime = _parse_date(date)
         return date_comparison._date(parsed_date)
 
     @overload
@@ -299,5 +294,5 @@ class DateField(Field):
         if date is None:
             return date_comparison
 
-        parsed_date: datetime = self._parse_date(date)
+        parsed_date: datetime = _parse_date(date)
         return date_comparison._date(parsed_date)
