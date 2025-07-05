@@ -6,14 +6,6 @@ from pydantic import BaseModel
 
 COMPARISON = Literal["=", "!=", ">", "<", ">=", "<="]
 
-# class Formula():
-#     table: str
-#     # use_field_ids: bool
-#     # field_id_map: dict[str, str]
-
-#     def __init__(self, table: str):
-#         self.table = table
-
 
 def AND(*args: str) -> str:  # noqa: N802
     return f"AND({','.join(args)})"
