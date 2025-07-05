@@ -16,7 +16,6 @@ from airtableformulahelpers import (
     NumberField,
     TextField,
     TextListField,
-    _parse_date,
     id_equals,
 )
 
