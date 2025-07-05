@@ -51,7 +51,7 @@ class Field(BaseModel):
 
     def is_empty(self) -> str:
         return f"{{{self.name}}}=BLANK()"
-    
+
     def is_not_empty(self) -> str:
         return f"{{{self.name}}}"
 
@@ -167,6 +167,7 @@ class AttachmentsField(Field):
     def count_is(self, count: int) -> str:
         return f"LEN({{{self.name}}})={count}"
 
+
 def _parse_date(date: datetime | str) -> datetime:
     if isinstance(date, datetime):
         parsed_date = date
@@ -176,6 +177,7 @@ def _parse_date(date: datetime | str) -> datetime:
             raise ValueError(f"Could not parse date: {date}")
         parsed_date: datetime = result
     return parsed_date
+
 
 class DateComparison(Field):
     compare: COMPARISON
@@ -213,6 +215,7 @@ class DateComparison(Field):
 
     def years_ago(self, years: int) -> str:
         return self._ago("years", years)
+
 
 class DateField(Field):
     """DateTime comparison formulas"""

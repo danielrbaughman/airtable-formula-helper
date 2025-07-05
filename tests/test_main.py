@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import pytest
+
 from airtableformulahelpers import (
     AND,
     IF,
@@ -14,6 +16,7 @@ from airtableformulahelpers import (
     NumberField,
     TextField,
     TextListField,
+    _parse_date,
     id_equals,
 )
 
@@ -41,18 +44,14 @@ class TestLogicFunctions:
             """Test AND with real field conditions"""
             name_field = TextField(name="Name")
             status_field = BooleanField(name="Active")
-            
-            result = AND(
-                name_field.equals("John"),
-                status_field.is_true()
-            )
+
+            result = AND(name_field.equals("John"), status_field.is_true())
             assert result == 'AND({Name}="John",{Active}=TRUE())'
 
         def test_and_with_many_arguments(self):
             """Test AND with many arguments"""
             result = AND("a", "b", "c", "d", "e")
             assert result == "AND(a,b,c,d,e)"
-
 
     class TestOR:
         """Tests for the OR logical function"""
@@ -75,11 +74,11 @@ class TestLogicFunctions:
         def test_or_with_field_conditions(self):
             """Test OR with real field conditions"""
             status_field = TextField(name="Status")
-            
+
             result = OR(
                 status_field.equals("Draft"),
                 status_field.equals("Review"),
-                status_field.equals("Published")
+                status_field.equals("Published"),
             )
             assert result == 'OR({Status}="Draft",{Status}="Review",{Status}="Published")'
 
@@ -87,7 +86,6 @@ class TestLogicFunctions:
             """Test OR with many arguments"""
             result = OR("x", "y", "z", "w")
             assert result == "OR(x,y,z,w)"
-
 
     class TestXOR:
         """Tests for the XOR logical function"""
@@ -111,18 +109,14 @@ class TestLogicFunctions:
             """Test XOR with real field conditions"""
             flag1 = BooleanField(name="Flag1")
             flag2 = BooleanField(name="Flag2")
-            
-            result = XOR(
-                flag1.is_true(),
-                flag2.is_true()
-            )
+
+            result = XOR(flag1.is_true(), flag2.is_true())
             assert result == "XOR({Flag1}=TRUE(),{Flag2}=TRUE())"
 
         def test_xor_with_many_arguments(self):
             """Test XOR with many arguments"""
             result = XOR("p", "q", "r")
             assert result == "XOR(p,q,r)"
-
 
     class TestNOT:
         """Tests for the NOT logical function"""
@@ -145,7 +139,7 @@ class TestLogicFunctions:
         def test_not_with_field_conditions(self):
             """Test NOT with real field conditions"""
             active_field = BooleanField(name="Active")
-            
+
             result = NOT(active_field.is_true())
             assert result == "NOT({Active}=TRUE())"
 
@@ -153,32 +147,21 @@ class TestLogicFunctions:
             """Test NOT with multiple field conditions"""
             name_field = TextField(name="Name")
             status_field = TextField(name="Status")
-            
-            result = NOT(
-                name_field.is_empty(),
-                status_field.equals("Archived")
-            )
-            assert result == 'NOT({Name}=BLANK(),{Status}="Archived")'
 
+            result = NOT(name_field.is_empty(), status_field.equals("Archived"))
+            assert result == 'NOT({Name}=BLANK(),{Status}="Archived")'
 
     class TestLogicCombinations:
         """Integration tests for combining logical functions"""
 
         def test_nested_logical_operations(self):
             """Test nesting logical functions"""
-            result = AND(
-                OR("a", "b"),
-                NOT("c"),
-                XOR("d", "e")
-            )
+            result = AND(OR("a", "b"), NOT("c"), XOR("d", "e"))
             assert result == "AND(OR(a,b),NOT(c),XOR(d,e))"
 
         def test_complex_nested_operations(self):
             """Test complex nested logical operations"""
-            result = OR(
-                AND("condition1", "condition2"),
-                NOT(XOR("condition3", "condition4"))
-            )
+            result = OR(AND("condition1", "condition2"), NOT(XOR("condition3", "condition4")))
             assert result == "OR(AND(condition1,condition2),NOT(XOR(condition3,condition4)))"
 
         def test_real_world_complex_formula(self):
@@ -186,23 +169,17 @@ class TestLogicFunctions:
             name_field = TextField(name="Name")
             status_field = TextField(name="Status")
             active_field = BooleanField(name="Active")
-            
+
             result = OR(
                 AND(
                     name_field.not_equals(""),
                     status_field.equals("Published"),
-                    active_field.is_true()
+                    active_field.is_true(),
                 ),
-                NOT(
-                    XOR(
-                        status_field.equals("Draft"),
-                        status_field.equals("Review")
-                    )
-                )
+                NOT(XOR(status_field.equals("Draft"), status_field.equals("Review"))),
             )
             expected = 'OR(AND({Name}!="",{Status}="Published",{Active}=TRUE()),NOT(XOR({Status}="Draft",{Status}="Review")))'
             assert result == expected
-
 
     class TestLogicEdgeCases:
         """Edge case tests for logical functions"""
@@ -234,7 +211,7 @@ class TestLogicFunctions:
             """Test with many arguments"""
             conditions = [f"condition{i}" for i in range(10)]
             expected_args = ",".join(conditions)
-            
+
             assert AND(*conditions) == f"AND({expected_args})"
             assert OR(*conditions) == f"OR({expected_args})"
             assert XOR(*conditions) == f"XOR({expected_args})"
@@ -252,11 +229,9 @@ class TestLogicFunctions:
             text_field = TextField(name="Name")
             bool_field = BooleanField(name="Active")
             number_field = NumberField(name="Score")
-            
+
             result = AND(
-                text_field.not_equals(""),
-                bool_field.is_true(),
-                number_field.greater_than(0)
+                text_field.not_equals(""), bool_field.is_true(), number_field.greater_than(0)
             )
             expected = 'AND({Name}!="",{Active}=TRUE(),{Score}>0)'
             assert result == expected
@@ -267,12 +242,10 @@ class TestLogicFunctions:
             field2 = TextField(name="F2")
             field3 = TextField(name="F3")
             field4 = TextField(name="F4")
-            
+
             result = AND(
                 OR(field1.equals("A"), field2.equals("B")),
-                NOT(
-                    XOR(field3.equals("C"), field4.equals("D"))
-                )
+                NOT(XOR(field3.equals("C"), field4.equals("D"))),
             )
             expected = 'AND(OR({F1}="A",{F2}="B"),NOT(XOR({F3}="C",{F4}="D")))'
             assert result == expected
@@ -296,55 +269,55 @@ class TestIF:
         """Test IF/THEN/ELSE with complex conditions"""
         name_field = TextField(name="Name")
         active_field = BooleanField(name="Active")
-        
-        condition = AND(
-            name_field.not_equals(""),
-            active_field.is_true()
-        )
-        
+
+        condition = AND(name_field.not_equals(""), active_field.is_true())
+
         result = IF(condition).THEN("Valid").ELSE("Invalid")
         assert result == 'IF(AND({Name}!="",{Active}=TRUE()), Valid, Invalid)'
 
     def test_if_then_else_nested(self):
         """Test nested IF statements"""
         score_field = NumberField(name="Score")
-        
+
         inner_if = IF(score_field.greater_than(90)).THEN("A").ELSE("B")
         outer_if = IF(score_field.greater_than(95)).THEN("A+").ELSE(inner_if)
-        
+
         assert outer_if == "IF({Score}>95, A+, IF({Score}>90, A, B))"
 
     def test_if_with_logical_functions(self):
         """Test IF with various logical functions"""
         field1 = TextField(name="Field1")
         field2 = TextField(name="Field2")
-        
+
         # Test with OR
         result = IF(OR(field1.equals("A"), field2.equals("B"))).THEN("Pass").ELSE("Fail")
         assert result == 'IF(OR({Field1}="A",{Field2}="B"), Pass, Fail)'
-        
+
         # Test with NOT
         result = IF(NOT(field1.is_empty())).THEN("Has Value").ELSE("Empty")
         assert result == "IF(NOT({Field1}=BLANK()), Has Value, Empty)"
-    
+
     def test_if_then_else_with_all_field_types(self):
         """Test IF/THEN/ELSE with all field types"""
         text_field = TextField(name="Status")
         bool_field = BooleanField(name="Active")
         number_field = NumberField(name="Count")
         attachment_field = AttachmentsField(name="Files")
-        
+
         # Complex condition using all field types
         condition = AND(
             text_field.equals("Published"),
             bool_field.is_true(),
             number_field.greater_than(0),
-            attachment_field.is_not_empty()
+            attachment_field.is_not_empty(),
         )
-        
+
         result = IF(condition).THEN("Valid").ELSE("Invalid")
-        expected = 'IF(AND({Status}="Published",{Active}=TRUE(),{Count}>0,LEN({Files})>0), Valid, Invalid)'
+        expected = (
+            'IF(AND({Status}="Published",{Active}=TRUE(),{Count}>0,LEN({Files})>0), Valid, Invalid)'
+        )
         assert result == expected
+
 
 class TestBasics:
     class TestID:
@@ -361,7 +334,6 @@ class TestBasics:
             test_id = "rec-123_ABC"
             result = id_equals(test_id)
             assert result == f"RECORD_ID()='{test_id}'"
-
 
     class TestField:
         """Tests for the base Field class"""
@@ -401,17 +373,17 @@ class TestBasics:
                 "Field Name",  # spaces
                 "Field-Name",  # hyphens
                 "Field_Name",  # underscores
-                "Field123",    # numbers
+                "Field123",  # numbers
                 "Field.Name",  # dots
-                "Field(1)",    # parentheses
+                "Field(1)",  # parentheses
             ]
-            
+
             for name in special_names:
                 # Test all field types handle special characters
                 text_field = TextField(name=name)
                 bool_field = BooleanField(name=name)
                 number_field = NumberField(name=name)
-                
+
                 assert text_field.equals("test") == f'{{{name}}}="test"'
                 assert bool_field.is_true() == f"{{{name}}}=TRUE()"
                 assert number_field.equals(1) == f"{{{name}}}=1"
@@ -486,14 +458,14 @@ class TestFields:
         def test_text_field_with_special_characters(self):
             """Test TextField with special characters in values"""
             field = TextField(name="Data")
-            
+
             # Test with quotes
             result = field.equals('Text with "quotes"')
             assert result == '{Data}="Text with "quotes""'
-            
+
             # Test with apostrophes
             result = field.equals("Text with 'apostrophes'")
-            assert result == '{Data}="Text with \'apostrophes\'"'
+            assert result == "{Data}=\"Text with 'apostrophes'\""
 
         def test_text_field_with_empty_values(self):
             """Test TextField with empty values"""
@@ -504,7 +476,7 @@ class TestFields:
         def test_text_field_inheritance(self):
             """Test TextField inherits from Field"""
             field = TextField(name="TestField")
-            
+
             # Test inherited methods
             assert field.is_empty() == "{TestField}=BLANK()"
             assert field.is_not_empty() == "{TestField}"
@@ -513,55 +485,56 @@ class TestFields:
         def test_text_field_complex_regex(self):
             """Test TextField with complex regex patterns"""
             field = TextField(name="Code")
-            
+
             # Email pattern
             result = field.regex_match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
-            assert result == r'REGEX_MATCH({Code}, "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")'
+            assert (
+                result == r'REGEX_MATCH({Code}, "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")'
+            )
 
         def test_text_field_find_method_edge_cases(self):
             """Test TextField _find method with edge cases"""
             field = TextField(name="Content")
-            
+
             # Test with numbers
             result = field.contains("123")
             assert result == 'FIND(TRIM(LOWER("123")), TRIM(LOWER({Content})))>0'
-            
-            # Test with special characters  
+
+            # Test with special characters
             result = field.contains("@#$")
             assert result == 'FIND(TRIM(LOWER("@#$")), TRIM(LOWER({Content})))>0'
-        
+
         def test_text_field_with_very_long_strings(self):
             """Test TextField with very long strings"""
             field = TextField(name="LongText")
             long_string = "A" * 1000  # 1000 character string
-            
+
             result = field.equals(long_string)
             assert result == f'{{LongText}}="{long_string}"'
 
         def test_unicode_and_special_characters_in_values(self):
             """Test fields with unicode and special characters in values"""
             field = TextField(name="Unicode")
-            
+
             # Test with emoji
             assert field.equals("Hello 👋") == '{Unicode}="Hello 👋"'
-            
+
             # Test with unicode characters
             assert field.equals("Café") == '{Unicode}="Café"'
-            
+
             # Test with special symbols
             assert field.equals("Price: $50.00") == '{Unicode}="Price: $50.00"'
 
         def test_regex_with_complex_patterns(self):
             """Test TextField regex with complex patterns"""
             field = TextField(name="Pattern")
-            
+
             # Complex email regex
             email_pattern = r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
             result = field.regex_match(email_pattern)
             assert result == f'REGEX_MATCH({{Pattern}}, "{email_pattern}")'
 
-
-    class TestListField:
+    class TestTextListField:
         """Tests for ListField class"""
 
         def test_list_field_contains(self):
@@ -619,11 +592,11 @@ class TestFields:
         def test_list_field_with_special_characters(self):
             """Test ListField with special characters in values"""
             field = TextListField(name="Data")
-            
+
             # Test with spaces
             result = field.contains("web development")
             assert result == 'FIND(LOWER("web development"), LOWER({Data}))>0'
-            
+
             # Test with special characters
             result = field.contains("C++")
             assert result == 'FIND(LOWER("C++"), LOWER({Data}))>0'
@@ -631,7 +604,7 @@ class TestFields:
         def test_list_field_inheritance(self):
             """Test ListField inherits from Field"""
             field = TextListField(name="TestList")
-            
+
             # Test inherited methods
             assert field.is_empty() == "{TestList}=BLANK()"
             assert field.is_not_empty() == "{TestList}"
@@ -640,27 +613,26 @@ class TestFields:
         def test_list_field_case_insensitive(self):
             """Test ListField case insensitive behavior"""
             field = TextListField(name="Items")
-            
+
             # Test with mixed case
             result = field.contains("Python")
             assert result == 'FIND(LOWER("Python"), LOWER({Items}))>0'
-            
+
             result = field.contains_all(["JAVA", "python", "Go"])
             expected = 'AND(FIND(LOWER("JAVA"), LOWER({Items}))>0,FIND(LOWER("python"), LOWER({Items}))>0,FIND(LOWER("Go"), LOWER({Items}))>0)'
             assert result == expected
-        
+
         def test_list_field_with_large_lists(self):
             """Test ListField with large lists"""
             field = TextListField(name="BigList")
             large_list = [f"item{i}" for i in range(5)]  # Reduced to 5 for cleaner test
-            
+
             result = field.contains_all(large_list)
             # Should generate an AND statement with 5 conditions
             assert result.startswith("AND(")
             assert result.endswith(")")
             # Count the number of FIND functions instead of commas since commas appear inside FIND functions too
             assert result.count("FIND(") == 5
-
 
     class TestNumberField:
         """Tests for Number field class"""
@@ -716,7 +688,7 @@ class TestFields:
         def test_number_field_with_negative_numbers(self):
             """Test Number field with negative numbers"""
             field = NumberField(name="Temperature")
-            
+
             assert field.equals(-10) == "{Temperature}=-10"
             assert field.greater_than(-5) == "{Temperature}>-5"
             assert field.less_than(-15) == "{Temperature}<-15"
@@ -724,7 +696,7 @@ class TestFields:
         def test_number_field_with_zero(self):
             """Test Number field with zero"""
             field = NumberField(name="Count")
-            
+
             assert field.equals(0) == "{Count}=0"
             assert field.not_equals(0) == "{Count}!=0"
             assert field.greater_than(0) == "{Count}>0"
@@ -733,21 +705,21 @@ class TestFields:
         def test_number_field_with_large_numbers(self):
             """Test Number field with large numbers"""
             field = NumberField(name="Population")
-            
+
             assert field.equals(1000000) == "{Population}=1000000"
             assert field.greater_than(999999) == "{Population}>999999"
 
         def test_number_field_with_decimal_precision(self):
             """Test Number field with decimal precision"""
             field = NumberField(name="Precision")
-            
+
             assert field.equals(3.14159) == "{Precision}=3.14159"
             assert field.greater_than(0.001) == "{Precision}>0.001"
 
         def test_number_field_inheritance(self):
             """Test Number field inherits from Field"""
             field = NumberField(name="TestNumber")
-            
+
             # Test inherited methods
             assert field.is_empty() == "{TestNumber}=BLANK()"
             assert field.is_not_empty() == "{TestNumber}"
@@ -756,7 +728,7 @@ class TestFields:
         def test_number_field_compare_method(self):
             """Test Number field _compare method indirectly"""
             field = NumberField(name="Value")
-            
+
             # Test all comparison operators
             assert field._compare("=", 10) == "{Value}=10"
             assert field._compare("!=", 10) == "{Value}!=10"
@@ -764,22 +736,21 @@ class TestFields:
             assert field._compare("<", 10) == "{Value}<10"
             assert field._compare(">=", 10) == "{Value}>=10"
             assert field._compare("<=", 10) == "{Value}<=10"
-        
+
         def test_number_field_with_extreme_values(self):
             """Test Number field with extreme values"""
             field = NumberField(name="Extreme")
-            
+
             # Test very large numbers
             assert field.equals(999999999999) == "{Extreme}=999999999999"
-            
+
             # Test very small decimals
             assert field.equals(0.000001) == "{Extreme}=1e-06"
-            
+
             # Test negative large numbers
             assert field.equals(-999999999999) == "{Extreme}=-999999999999"
 
-
-    class TestBoolField:
+    class TestBooleanField:
         """Comprehensive tests for BoolField class"""
 
         def test_bool_field_equals_true(self):
@@ -809,7 +780,7 @@ class TestFields:
         def test_bool_field_inheritance(self):
             """Test BoolField inherits from Field"""
             field = BooleanField(name="TestBool")
-            
+
             # Test inherited methods
             assert field.is_empty() == "{TestBool}=BLANK()"
             assert field.is_not_empty() == "{TestBool}"
@@ -821,9 +792,9 @@ class TestFields:
                 BooleanField(name="Active"),
                 BooleanField(name="Is Published"),
                 BooleanField(name="has_permissions"),
-                BooleanField(name="Flag-123")
+                BooleanField(name="Flag-123"),
             ]
-            
+
             for field in fields:
                 assert field.is_true() == f"{{{field.name}}}=TRUE()"
                 assert field.is_false() == f"{{{field.name}}}=FALSE()"
@@ -831,7 +802,7 @@ class TestFields:
         def test_bool_field_equals_method_behavior(self):
             """Test BoolField equals method with different boolean values"""
             field = BooleanField(name="Status")
-            
+
             # Test with explicit boolean values
             assert field.equals(True) == "{Status}=TRUE()"
             assert field.equals(False) == "{Status}=FALSE()"
@@ -840,19 +811,18 @@ class TestFields:
             """Test BoolField in logical operations"""
             active_field = BooleanField(name="Active")
             verified_field = BooleanField(name="Verified")
-            
+
             # Test with AND
             result = AND(active_field.is_true(), verified_field.is_true())
             assert result == "AND({Active}=TRUE(),{Verified}=TRUE())"
-            
+
             # Test with OR
             result = OR(active_field.is_false(), verified_field.is_false())
             assert result == "OR({Active}=FALSE(),{Verified}=FALSE())"
-            
+
             # Test with NOT
             result = NOT(active_field.is_true())
             assert result == "NOT({Active}=TRUE())"
-
 
     class TestAttachmentsField:
         """Tests for AttachmentsField class"""
@@ -872,7 +842,7 @@ class TestFields:
         def test_attachments_field_count_is(self):
             """Test AttachmentsField count_is method"""
             field = AttachmentsField(name="Images")
-            
+
             # Test with different counts
             assert field.count_is(1) == "LEN({Images})=1"
             assert field.count_is(5) == "LEN({Images})=5"
@@ -881,11 +851,11 @@ class TestFields:
         def test_attachments_field_overrides_base_methods(self):
             """Test AttachmentsField overrides base Field methods"""
             field = AttachmentsField(name="Files")
-            
+
             # Test that is_empty and is_not_empty are overridden
             assert field.is_empty() == "LEN({Files})=0"
             assert field.is_not_empty() == "LEN({Files})>0"
-            
+
             # Test that these are different from base Field methods
             base_field = Field(name="Files")
             assert field.is_empty() != base_field.is_empty()
@@ -894,7 +864,7 @@ class TestFields:
         def test_attachments_field_inheritance(self):
             """Test AttachmentsField inherits from Field"""
             field = AttachmentsField(name="TestAttachments")
-            
+
             # Test inherited name property
             assert field.name == "TestAttachments"
 
@@ -904,9 +874,9 @@ class TestFields:
                 AttachmentsField(name="Photos"),
                 AttachmentsField(name="Supporting Documents"),
                 AttachmentsField(name="file_uploads"),
-                AttachmentsField(name="Media-Files")
+                AttachmentsField(name="Media-Files"),
             ]
-            
+
             for field in fields:
                 assert field.is_empty() == f"LEN({{{field.name}}})=0"
                 assert field.is_not_empty() == f"LEN({{{field.name}}})>0"
@@ -916,11 +886,11 @@ class TestFields:
             """Test AttachmentsField in logical operations"""
             photos_field = AttachmentsField(name="Photos")
             docs_field = AttachmentsField(name="Documents")
-            
+
             # Test with AND
             result = AND(photos_field.is_not_empty(), docs_field.count_is(2))
             assert result == "AND(LEN({Photos})>0,LEN({Documents})=2)"
-            
+
             # Test with OR
             result = OR(photos_field.is_empty(), docs_field.is_empty())
             assert result == "OR(LEN({Photos})=0,LEN({Documents})=0)"
@@ -928,22 +898,54 @@ class TestFields:
         def test_attachments_field_count_variations(self):
             """Test AttachmentsField count_is with various numbers"""
             field = AttachmentsField(name="Attachments")
-            
+
             # Test edge cases
             assert field.count_is(0) == "LEN({Attachments})=0"
             assert field.count_is(1) == "LEN({Attachments})=1"
             assert field.count_is(10) == "LEN({Attachments})=10"
             assert field.count_is(100) == "LEN({Attachments})=100"
-        
+
         def test_attachment_field_with_large_counts(self):
             """Test AttachmentsField with large counts"""
             field = AttachmentsField(name="ManyFiles")
-            
-            assert field.count_is(10000) == "LEN({ManyFiles})=10000"
 
+            assert field.count_is(10000) == "LEN({ManyFiles})=10000"
 
     class TestDateField:
         """Tests for DateField class"""
+
+        def test_date_field_methods_with_invalid_date(self):
+            """Test DateField methods with invalid date strings to trigger _parse_date error"""
+            field = DateField(name="TestDate")
+
+            # Test each DateField method with invalid date to ensure error path coverage
+            invalid_date = "not-a-real-date-format"
+
+            # Test all DateField methods that accept dates
+            with pytest.raises(ValueError, match="Could not parse date:"):
+                field.is_on(invalid_date)
+
+            with pytest.raises(ValueError, match="Could not parse date:"):
+                field.is_before(invalid_date)
+
+            with pytest.raises(ValueError, match="Could not parse date:"):
+                field.is_after(invalid_date)
+
+            with pytest.raises(ValueError, match="Could not parse date:"):
+                field.is_on_or_before(invalid_date)
+
+            with pytest.raises(ValueError, match="Could not parse date:"):
+                field.is_on_or_after(invalid_date)
+
+            with pytest.raises(ValueError, match="Could not parse date:"):
+                field.is_not_on(invalid_date)
+
+        def test_date_comparison_date_method_with_invalid_date(self):
+            """Test DateComparison._date method with invalid date string"""
+            comparison = DateComparison(name="TestField", compare="=")
+
+            with pytest.raises(ValueError, match="Could not parse date:"):
+                comparison._date("definitely-not-a-date")
 
         def test_date_field_is_on_with_datetime(self):
             """Test DateField is_on method with datetime object"""
@@ -1044,26 +1046,25 @@ class TestFields:
         def test_date_field_inheritance(self):
             """Test DateField inherits from Field"""
             field = DateField(name="TestDate")
-            
+
             # Test inherited methods
             assert field.is_empty() == "{TestDate}=BLANK()"
             assert field.is_not_empty() == "{TestDate}"
             assert field.name == "TestDate"
-        
+
         def test_date_field_with_edge_case_dates(self):
             """Test DateField with edge case dates"""
             field = DateField(name="EdgeDate")
-            
+
             # Test leap year
             leap_date = datetime(2024, 2, 29, 0, 0, 0)
             result = field.is_on(leap_date)
             assert result == "DATETIME_PARSE('2024-02-29 00:00:00')=DATETIME_PARSE({EdgeDate})"
-            
+
             # Test end of year
             end_year = datetime(2023, 12, 31, 23, 59, 59)
             result = field.is_before(end_year)
             assert result == "DATETIME_PARSE('2023-12-31 23:59:59')>DATETIME_PARSE({EdgeDate})"
-
 
         class TestDateComparison:
             """Tests for DateComparison class"""
@@ -1138,7 +1139,7 @@ class TestFields:
             def test_date_comparison_inheritance(self):
                 """Test DateComparison inherits from Field"""
                 comparison = DateComparison(name="TestDate", compare="=")
-                
+
                 # Test inherited methods
                 assert comparison.is_empty() == "{TestDate}=BLANK()"
                 assert comparison.is_not_empty() == "{TestDate}"
@@ -1147,12 +1148,12 @@ class TestFields:
             def test_date_comparison_with_different_operators(self):
                 """Test DateComparison with different comparison operators"""
                 operators = ["=", "!=", ">", "<", ">=", "<="]
-                
+
                 for op in operators:
                     comparison = DateComparison(name="TestField", compare=op)
                     result = comparison.days_ago(10)
                     assert result == f"DATETIME_DIFF(NOW(), {{TestField}}, 'days'){op}10"
-        
+
         class TestDateFieldChaining:
             """Comprehensive tests for DateField chaining to DateComparison operations"""
 
@@ -1538,59 +1539,120 @@ class TestFields:
             def test_date_field_chaining_with_zero_values(self):
                 """Test DateField chaining with zero values"""
                 field = DateField(name="TestField")
-                
+
                 # Test zero values for all time units
-                assert field.is_on().milliseconds_ago(0) == "DATETIME_DIFF(NOW(), {TestField}, 'milliseconds')=0"
-                assert field.is_before().seconds_ago(0) == "DATETIME_DIFF(NOW(), {TestField}, 'seconds')>0"
-                assert field.is_after().minutes_ago(0) == "DATETIME_DIFF(NOW(), {TestField}, 'minutes')<0"
-                assert field.is_on_or_before().hours_ago(0) == "DATETIME_DIFF(NOW(), {TestField}, 'hours')<=0"
-                assert field.is_on_or_after().days_ago(0) == "DATETIME_DIFF(NOW(), {TestField}, 'days')>=0"
-                assert field.is_not_on().weeks_ago(0) == "DATETIME_DIFF(NOW(), {TestField}, 'weeks')!=0"
+                assert (
+                    field.is_on().milliseconds_ago(0)
+                    == "DATETIME_DIFF(NOW(), {TestField}, 'milliseconds')=0"
+                )
+                assert (
+                    field.is_before().seconds_ago(0)
+                    == "DATETIME_DIFF(NOW(), {TestField}, 'seconds')>0"
+                )
+                assert (
+                    field.is_after().minutes_ago(0)
+                    == "DATETIME_DIFF(NOW(), {TestField}, 'minutes')<0"
+                )
+                assert (
+                    field.is_on_or_before().hours_ago(0)
+                    == "DATETIME_DIFF(NOW(), {TestField}, 'hours')<=0"
+                )
+                assert (
+                    field.is_on_or_after().days_ago(0)
+                    == "DATETIME_DIFF(NOW(), {TestField}, 'days')>=0"
+                )
+                assert (
+                    field.is_not_on().weeks_ago(0)
+                    == "DATETIME_DIFF(NOW(), {TestField}, 'weeks')!=0"
+                )
 
             def test_date_field_chaining_with_negative_values(self):
                 """Test DateField chaining with negative values (future dates)"""
                 field = DateField(name="FutureField")
-                
+
                 # Test negative values for all time units
-                assert field.is_on().days_ago(-7) == "DATETIME_DIFF(NOW(), {FutureField}, 'days')=-7"
-                assert field.is_before().weeks_ago(-2) == "DATETIME_DIFF(NOW(), {FutureField}, 'weeks')>-2"
-                assert field.is_after().months_ago(-3) == "DATETIME_DIFF(NOW(), {FutureField}, 'months')<-3"
-                assert field.is_on_or_before().years_ago(-1) == "DATETIME_DIFF(NOW(), {FutureField}, 'years')<=-1"
-                assert field.is_on_or_after().hours_ago(-24) == "DATETIME_DIFF(NOW(), {FutureField}, 'hours')>=-24"
-                assert field.is_not_on().minutes_ago(-60) == "DATETIME_DIFF(NOW(), {FutureField}, 'minutes')!=-60"
+                assert (
+                    field.is_on().days_ago(-7) == "DATETIME_DIFF(NOW(), {FutureField}, 'days')=-7"
+                )
+                assert (
+                    field.is_before().weeks_ago(-2)
+                    == "DATETIME_DIFF(NOW(), {FutureField}, 'weeks')>-2"
+                )
+                assert (
+                    field.is_after().months_ago(-3)
+                    == "DATETIME_DIFF(NOW(), {FutureField}, 'months')<-3"
+                )
+                assert (
+                    field.is_on_or_before().years_ago(-1)
+                    == "DATETIME_DIFF(NOW(), {FutureField}, 'years')<=-1"
+                )
+                assert (
+                    field.is_on_or_after().hours_ago(-24)
+                    == "DATETIME_DIFF(NOW(), {FutureField}, 'hours')>=-24"
+                )
+                assert (
+                    field.is_not_on().minutes_ago(-60)
+                    == "DATETIME_DIFF(NOW(), {FutureField}, 'minutes')!=-60"
+                )
 
             def test_date_field_chaining_with_large_values(self):
                 """Test DateField chaining with large values"""
                 field = DateField(name="LargeField")
-                
+
                 # Test large values
-                assert field.is_on().milliseconds_ago(1000000) == "DATETIME_DIFF(NOW(), {LargeField}, 'milliseconds')=1000000"
-                assert field.is_before().seconds_ago(86400) == "DATETIME_DIFF(NOW(), {LargeField}, 'seconds')>86400"
-                assert field.is_after().minutes_ago(525600) == "DATETIME_DIFF(NOW(), {LargeField}, 'minutes')<525600"
-                assert field.is_on_or_before().hours_ago(8760) == "DATETIME_DIFF(NOW(), {LargeField}, 'hours')<=8760"
-                assert field.is_on_or_after().days_ago(365) == "DATETIME_DIFF(NOW(), {LargeField}, 'days')>=365"
-                assert field.is_not_on().years_ago(1000) == "DATETIME_DIFF(NOW(), {LargeField}, 'years')!=1000"
+                assert (
+                    field.is_on().milliseconds_ago(1000000)
+                    == "DATETIME_DIFF(NOW(), {LargeField}, 'milliseconds')=1000000"
+                )
+                assert (
+                    field.is_before().seconds_ago(86400)
+                    == "DATETIME_DIFF(NOW(), {LargeField}, 'seconds')>86400"
+                )
+                assert (
+                    field.is_after().minutes_ago(525600)
+                    == "DATETIME_DIFF(NOW(), {LargeField}, 'minutes')<525600"
+                )
+                assert (
+                    field.is_on_or_before().hours_ago(8760)
+                    == "DATETIME_DIFF(NOW(), {LargeField}, 'hours')<=8760"
+                )
+                assert (
+                    field.is_on_or_after().days_ago(365)
+                    == "DATETIME_DIFF(NOW(), {LargeField}, 'days')>=365"
+                )
+                assert (
+                    field.is_not_on().years_ago(1000)
+                    == "DATETIME_DIFF(NOW(), {LargeField}, 'years')!=1000"
+                )
 
             def test_date_field_chaining_with_very_small_milliseconds(self):
                 """Test DateField chaining with very small millisecond values"""
                 field = DateField(name="PreciseField")
-                
+
                 # Test very small values
-                assert field.is_on().milliseconds_ago(1) == "DATETIME_DIFF(NOW(), {PreciseField}, 'milliseconds')=1"
-                assert field.is_before().milliseconds_ago(10) == "DATETIME_DIFF(NOW(), {PreciseField}, 'milliseconds')>10"
-                assert field.is_after().milliseconds_ago(100) == "DATETIME_DIFF(NOW(), {PreciseField}, 'milliseconds')<100"
+                assert (
+                    field.is_on().milliseconds_ago(1)
+                    == "DATETIME_DIFF(NOW(), {PreciseField}, 'milliseconds')=1"
+                )
+                assert (
+                    field.is_before().milliseconds_ago(10)
+                    == "DATETIME_DIFF(NOW(), {PreciseField}, 'milliseconds')>10"
+                )
+                assert (
+                    field.is_after().milliseconds_ago(100)
+                    == "DATETIME_DIFF(NOW(), {PreciseField}, 'milliseconds')<100"
+                )
 
             # Integration tests with logical operations
             def test_date_field_chaining_with_and_operation(self):
                 """Test DateField chaining within AND operation"""
                 created_field = DateField(name="CreatedAt")
                 updated_field = DateField(name="UpdatedAt")
-                
+
                 result = AND(
-                    created_field.is_before().days_ago(30),
-                    updated_field.is_after().hours_ago(24)
+                    created_field.is_before().days_ago(30), updated_field.is_after().hours_ago(24)
                 )
-                
+
                 expected = "AND(DATETIME_DIFF(NOW(), {CreatedAt}, 'days')>30,DATETIME_DIFF(NOW(), {UpdatedAt}, 'hours')<24)"
                 assert result == expected
 
@@ -1598,21 +1660,21 @@ class TestFields:
                 """Test DateField chaining within OR operation"""
                 start_field = DateField(name="StartDate")
                 end_field = DateField(name="EndDate")
-                
+
                 result = OR(
                     start_field.is_on_or_after().weeks_ago(2),
-                    end_field.is_on_or_before().months_ago(1)
+                    end_field.is_on_or_before().months_ago(1),
                 )
-                
+
                 expected = "OR(DATETIME_DIFF(NOW(), {StartDate}, 'weeks')>=2,DATETIME_DIFF(NOW(), {EndDate}, 'months')<=1)"
                 assert result == expected
 
             def test_date_field_chaining_with_not_operation(self):
                 """Test DateField chaining within NOT operation"""
                 last_login_field = DateField(name="LastLogin")
-                
+
                 result = NOT(last_login_field.is_on().days_ago(7))
-                
+
                 expected = "NOT(DATETIME_DIFF(NOW(), {LastLogin}, 'days')=7)"
                 assert result == expected
 
@@ -1621,15 +1683,15 @@ class TestFields:
                 created_field = DateField(name="Created")
                 modified_field = DateField(name="Modified")
                 accessed_field = DateField(name="Accessed")
-                
+
                 result = AND(
                     OR(
                         created_field.is_before().days_ago(30),
-                        modified_field.is_after().hours_ago(12)
+                        modified_field.is_after().hours_ago(12),
                     ),
-                    NOT(accessed_field.is_on().minutes_ago(60))
+                    NOT(accessed_field.is_on().minutes_ago(60)),
                 )
-                
+
                 expected = "AND(OR(DATETIME_DIFF(NOW(), {Created}, 'days')>30,DATETIME_DIFF(NOW(), {Modified}, 'hours')<12),NOT(DATETIME_DIFF(NOW(), {Accessed}, 'minutes')=60))"
                 assert result == expected
 
@@ -1637,9 +1699,9 @@ class TestFields:
             def test_date_field_chaining_with_if_then_else(self):
                 """Test DateField chaining in IF/THEN/ELSE statement"""
                 due_date_field = DateField(name="DueDate")
-                
+
                 result = IF(due_date_field.is_before().days_ago(7)).THEN("Overdue").ELSE("On Time")
-                
+
                 expected = "IF(DATETIME_DIFF(NOW(), {DueDate}, 'days')>7, Overdue, On Time)"
                 assert result == expected
 
@@ -1647,14 +1709,16 @@ class TestFields:
                 """Test DateField chaining in nested IF statements"""
                 created_field = DateField(name="CreatedDate")
                 updated_field = DateField(name="UpdatedDate")
-                
+
                 inner_condition = updated_field.is_after().hours_ago(6)
                 outer_condition = created_field.is_before().days_ago(1)
-                
-                result = IF(outer_condition).THEN(
-                    IF(inner_condition).THEN("Recent Update").ELSE("Old Update")
-                ).ELSE("New Item")
-                
+
+                result = (
+                    IF(outer_condition)
+                    .THEN(IF(inner_condition).THEN("Recent Update").ELSE("Old Update"))
+                    .ELSE("New Item")
+                )
+
                 expected = "IF(DATETIME_DIFF(NOW(), {CreatedDate}, 'days')>1, IF(DATETIME_DIFF(NOW(), {UpdatedDate}, 'hours')<6, Recent Update, Old Update), New Item)"
                 assert result == expected
 
@@ -1662,14 +1726,18 @@ class TestFields:
                 """Test DateField chaining with multiple conditions in IF statement"""
                 publish_field = DateField(name="PublishedAt")
                 expire_field = DateField(name="ExpiresAt")
-                
+
                 condition = AND(
-                    publish_field.is_before().days_ago(0),  # Published (negative value means in the past)
-                    expire_field.is_after().days_ago(0)     # Not expired (positive value means in the future)
+                    publish_field.is_before().days_ago(
+                        0
+                    ),  # Published (negative value means in the past)
+                    expire_field.is_after().days_ago(
+                        0
+                    ),  # Not expired (positive value means in the future)
                 )
-                
+
                 result = IF(condition).THEN("Active").ELSE("Inactive")
-                
+
                 expected = "IF(AND(DATETIME_DIFF(NOW(), {PublishedAt}, 'days')>0,DATETIME_DIFF(NOW(), {ExpiresAt}, 'days')<0), Active, Inactive)"
                 assert result == expected
 
@@ -1678,15 +1746,14 @@ class TestFields:
                 """Test DateField chaining for content freshness validation"""
                 created_field = DateField(name="CreatedAt")
                 updated_field = DateField(name="UpdatedAt")
-                
+
                 # Content is fresh if created within 7 days OR updated within 1 day
                 fresh_content = OR(
-                    created_field.is_after().days_ago(7),
-                    updated_field.is_after().days_ago(1)
+                    created_field.is_after().days_ago(7), updated_field.is_after().days_ago(1)
                 )
-                
+
                 result = IF(fresh_content).THEN("Fresh").ELSE("Stale")
-                
+
                 expected = "IF(OR(DATETIME_DIFF(NOW(), {CreatedAt}, 'days')<7,DATETIME_DIFF(NOW(), {UpdatedAt}, 'days')<1), Fresh, Stale)"
                 assert result == expected
 
@@ -1694,15 +1761,15 @@ class TestFields:
                 """Test DateField chaining for user activity analysis"""
                 last_login_field = DateField(name="LastLogin")
                 account_created_field = DateField(name="AccountCreated")
-                
+
                 # User is active if logged in within 30 days AND account is older than 7 days
                 active_user = AND(
                     last_login_field.is_after().days_ago(30),
-                    account_created_field.is_before().days_ago(7)
+                    account_created_field.is_before().days_ago(7),
                 )
-                
+
                 result = IF(active_user).THEN("Active User").ELSE("Inactive User")
-                
+
                 expected = "IF(AND(DATETIME_DIFF(NOW(), {LastLogin}, 'days')<30,DATETIME_DIFF(NOW(), {AccountCreated}, 'days')>7), Active User, Inactive User)"
                 assert result == expected
 
@@ -1710,27 +1777,31 @@ class TestFields:
                 """Test DateField chaining for subscription status check"""
                 subscription_start = DateField(name="SubscriptionStart")
                 subscription_end = DateField(name="SubscriptionEnd")
-                
+
                 # Subscription is active if started and not expired
                 active_subscription = AND(
                     subscription_start.is_before().days_ago(0),  # Started (in the past)
-                    subscription_end.is_after().days_ago(0)      # Not expired (in the future)
+                    subscription_end.is_after().days_ago(0),  # Not expired (in the future)
                 )
-                
-                result = IF(active_subscription).THEN("Active Subscription").ELSE("Inactive Subscription")
-                
+
+                result = (
+                    IF(active_subscription)
+                    .THEN("Active Subscription")
+                    .ELSE("Inactive Subscription")
+                )
+
                 expected = "IF(AND(DATETIME_DIFF(NOW(), {SubscriptionStart}, 'days')>0,DATETIME_DIFF(NOW(), {SubscriptionEnd}, 'days')<0), Active Subscription, Inactive Subscription)"
                 assert result == expected
 
             def test_date_field_chaining_maintenance_window(self):
                 """Test DateField chaining for maintenance window detection"""
                 last_maintenance = DateField(name="LastMaintenance")
-                
+
                 # Maintenance needed if last maintenance was more than 90 days ago
                 maintenance_needed = last_maintenance.is_before().days_ago(90)
-                
+
                 result = IF(maintenance_needed).THEN("Maintenance Required").ELSE("Maintenance OK")
-                
+
                 expected = "IF(DATETIME_DIFF(NOW(), {LastMaintenance}, 'days')>90, Maintenance Required, Maintenance OK)"
                 assert result == expected
 
@@ -1738,14 +1809,14 @@ class TestFields:
                 """Test DateField chaining with various field name formats"""
                 # Test with different field naming conventions
                 field_names = [
-                    "Created At",           # Spaces
-                    "last_modified",        # Underscores
-                    "Date-Time",           # Hyphens
-                    "field123",            # Numbers
-                    "Event.Date",          # Dots
-                    "Date (UTC)",          # Parentheses
+                    "Created At",  # Spaces
+                    "last_modified",  # Underscores
+                    "Date-Time",  # Hyphens
+                    "field123",  # Numbers
+                    "Event.Date",  # Dots
+                    "Date (UTC)",  # Parentheses
                 ]
-                
+
                 for field_name in field_names:
                     field = DateField(name=field_name)
                     result = field.is_on().days_ago(5)
@@ -1755,7 +1826,7 @@ class TestFields:
             def test_date_field_chaining_all_operators_coverage(self):
                 """Test DateField chaining covers all comparison operators"""
                 field = DateField(name="TestField")
-                
+
                 # Test all comparison operators are properly used
                 operators_and_methods = [
                     ("=", field.is_on()),
@@ -1763,15 +1834,16 @@ class TestFields:
                     (">", field.is_before()),
                     ("<", field.is_after()),
                     (">=", field.is_on_or_after()),
-                    ("<=", field.is_on_or_before())
+                    ("<=", field.is_on_or_before()),
                 ]
-                
+
                 for expected_op, comparison_obj in operators_and_methods:
                     assert comparison_obj.compare == expected_op
                     result = comparison_obj.days_ago(10)
                     assert expected_op in result
                     assert "DATETIME_DIFF(NOW(), {TestField}, 'days')" in result
                     assert "10" in result
+
 
 class TestCrossComponentIntegration:
     """Integration tests for cross-component interactions"""
@@ -1782,15 +1854,15 @@ class TestCrossComponentIntegration:
         email_field = TextField(name="Email")
         age_field = NumberField(name="Age")
         active_field = BooleanField(name="Active")
-        
+
         # Complex validation: name not empty, valid email, adult age, and active
         validation = AND(
             name_field.is_not_empty(),
             email_field.regex_match(r"^[^@]+@[^@]+\.[^@]+$"),
             age_field.greater_than_or_equals(18),
-            active_field.is_true()
+            active_field.is_true(),
         )
-        
+
         result = IF(validation).THEN("Valid User").ELSE("Invalid User")
         expected = 'IF(AND({Name},REGEX_MATCH({Email}, "^[^@]+@[^@]+\\.[^@]+$"),{Age}>=18,{Active}=TRUE()), Valid User, Invalid User)'
         assert result == expected
@@ -1801,17 +1873,17 @@ class TestCrossComponentIntegration:
         end_date = DateField(name="End Date")
         documents = AttachmentsField(name="Documents")
         status = TextField(name="Status")
-        
+
         # Project is ready if it has start date, end date is in future, has documents, and status is approved
         ready_condition = AND(
             start_date.is_not_empty(),
             end_date.is_on_or_after().days_ago(-30),  # End date is within 30 days in future
             documents.is_not_empty(),
-            status.equals("Approved")
+            status.equals("Approved"),
         )
-        
+
         result = IF(ready_condition).THEN("Ready to Launch").ELSE("Not Ready")
-        expected = 'IF(AND({Start Date},DATETIME_DIFF(NOW(), {End Date}, \'days\')>=-30,LEN({Documents})>0,{Status}="Approved"), Ready to Launch, Not Ready)'
+        expected = "IF(AND({Start Date},DATETIME_DIFF(NOW(), {End Date}, 'days')>=-30,LEN({Documents})>0,{Status}=\"Approved\"), Ready to Launch, Not Ready)"
         assert result == expected
 
     def test_e_commerce_product_filtering(self):
@@ -1821,16 +1893,16 @@ class TestCrossComponentIntegration:
         category_field = TextListField(name="Categories")
         in_stock_field = BooleanField(name="In Stock")
         images_field = AttachmentsField(name="Images")
-        
+
         # Find products: name contains "laptop", price under $2000, in electronics category, in stock, has images
         product_filter = AND(
             name_field.contains("laptop"),
             price_field.less_than(2000),
             category_field.contains("Electronics"),
             in_stock_field.is_true(),
-            images_field.is_not_empty()
+            images_field.is_not_empty(),
         )
-        
+
         result = IF(product_filter).THEN("Show Product").ELSE("Hide Product")
         expected = 'IF(AND(FIND(TRIM(LOWER("laptop")), TRIM(LOWER({Product Name})))>0,{Price}<2000,FIND(LOWER("Electronics"), LOWER({Categories}))>0,{In Stock}=TRUE(),LEN({Images})>0), Show Product, Hide Product)'
         assert result == expected
@@ -1842,16 +1914,16 @@ class TestCrossComponentIntegration:
         years_field = NumberField(name="Years of Service")
         department_field = TextListField(name="Department")
         active_field = BooleanField(name="Active")
-        
+
         # Bonus eligible: excellent performance, salary under 100k, 2+ years service, in sales/engineering, active
         bonus_eligible = AND(
             performance_field.equals("Excellent"),
             salary_field.less_than(100000),
             years_field.greater_than_or_equals(2),
             department_field.contains_any(["Sales", "Engineering"]),
-            active_field.is_true()
+            active_field.is_true(),
         )
-        
+
         result = IF(bonus_eligible).THEN("Eligible for Bonus").ELSE("Not Eligible")
         expected = 'IF(AND({Performance Rating}="Excellent",{Salary}<100000,{Years of Service}>=2,OR(FIND(LOWER("Sales"), LOWER({Department}))>0,FIND(LOWER("Engineering"), LOWER({Department}))>0),{Active}=TRUE()), Eligible for Bonus, Not Eligible)'
         assert result == expected
@@ -1862,15 +1934,15 @@ class TestCrossComponentIntegration:
         status_field = TextField(name="Status")
         materials_field = AttachmentsField(name="Materials")
         registrations_field = NumberField(name="Registrations")
-        
+
         # Event ready: venue confirmed, approved status, has exactly 3 materials, not overbooked
         event_ready = AND(
             venue_field.not_equals(""),
             status_field.equals("Approved"),
             materials_field.count_is(3),
-            registrations_field.less_than_or_equals(100)  # Fixed: provide actual value
+            registrations_field.less_than_or_equals(100),  # Fixed: provide actual value
         )
-        
+
         result = IF(event_ready).THEN("Event Ready").ELSE("Needs Preparation")
         expected = 'IF(AND({Venue}!="",{Status}="Approved",LEN({Materials})=3,{Registrations}<=100), Event Ready, Needs Preparation)'
         assert result == expected
@@ -1882,7 +1954,7 @@ class TestCrossComponentIntegration:
         author_field = TextField(name="Author")
         tags_field = TextListField(name="Tags")
         flagged_field = BooleanField(name="Flagged")
-        
+
         # Content approval: title not empty, content doesn't contain banned words, author verified, appropriate tags, not flagged
         content_approved = AND(
             title_field.is_not_empty(),
@@ -1892,11 +1964,11 @@ class TestCrossComponentIntegration:
             OR(
                 tags_field.contains("Educational"),
                 tags_field.contains("News"),
-                tags_field.contains("Entertainment")
+                tags_field.contains("Entertainment"),
             ),
-            NOT(flagged_field.is_true())
+            NOT(flagged_field.is_true()),
         )
-        
+
         result = IF(content_approved).THEN("Approved").ELSE("Needs Review")
         expected = 'IF(AND({Title},NOT(FIND(TRIM(LOWER("spam")), TRIM(LOWER({Content})))>0),NOT(FIND(TRIM(LOWER("inappropriate")), TRIM(LOWER({Content})))>0),{Author}!="Anonymous",OR(FIND(LOWER("Educational"), LOWER({Tags}))>0,FIND(LOWER("News"), LOWER({Tags}))>0,FIND(LOWER("Entertainment"), LOWER({Tags}))>0),NOT({Flagged}=TRUE())), Approved, Needs Review)'
         assert result == expected
@@ -1906,14 +1978,14 @@ class TestCrossComponentIntegration:
         quantity_field = NumberField(name="Quantity")
         location_field = TextField(name="Location")
         category_field = TextListField(name="Category")
-        
+
         # Item needs attention: low quantity OR in restricted location OR perishable
         simplified_attention = OR(
             quantity_field.less_than(10),
             location_field.equals("Quarantine"),
-            category_field.contains("Perishable")
+            category_field.contains("Perishable"),
         )
-        
+
         result = IF(simplified_attention).THEN("Needs Attention").ELSE("OK")
         expected = 'IF(OR({Quantity}<10,{Location}="Quarantine",FIND(LOWER("Perishable"), LOWER({Category}))>0), Needs Attention, OK)'
         assert result == expected
@@ -1925,18 +1997,18 @@ class TestCrossComponentIntegration:
         customer_type = TextField(name="Customer Type")
         preferences = TextListField(name="Preferences")
         vip_status = BooleanField(name="VIP")
-        
+
         # VIP Customer: many purchases, high spending, premium type, luxury preferences, or already VIP
         vip_customer = OR(
             AND(
                 purchase_count.greater_than(10),
                 total_spent.greater_than(1000),
-                customer_type.equals("Premium")
+                customer_type.equals("Premium"),
             ),
             preferences.contains("Luxury"),
-            vip_status.is_true()
+            vip_status.is_true(),
         )
-        
+
         result = IF(vip_customer).THEN("VIP Treatment").ELSE("Standard Service")
         expected = 'IF(OR(AND({Purchase Count}>10,{Total Spent}>1000,{Customer Type}="Premium"),FIND(LOWER("Luxury"), LOWER({Preferences}))>0,{VIP}=TRUE()), VIP Treatment, Standard Service)'
         assert result == expected
