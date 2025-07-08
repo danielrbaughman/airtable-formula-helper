@@ -69,60 +69,58 @@ class TextField(Field):
         return f'{{{self.name}}}!="{value}"'
 
     def _find(
-        self, value: str, comparison: str, case_sensitive: bool = False, no_trim: bool = False
+        self, value: str, comparison: str, case_sensitive: bool = False, trim: bool = True
     ) -> str:
         """case-insensitive"""
         if case_sensitive:
-            if no_trim:
-                return f'FIND("{value}", {{{self.name}}}){comparison}'
-            else:
+            if trim:
                 return f'FIND(TRIM("{value}"), TRIM({{{self.name}}})){comparison}'
-        else:
-            if no_trim:
-                return f'FIND(LOWER("{value}"), LOWER({{{self.name}}})){comparison}'
             else:
+                return f'FIND("{value}", {{{self.name}}}){comparison}'
+        else:
+            if trim:
                 return f'FIND(TRIM(LOWER("{value}")), TRIM(LOWER({{{self.name}}}))){comparison}'
+            else:
+                return f'FIND(LOWER("{value}"), LOWER({{{self.name}}})){comparison}'
 
-    def contains(self, value: str, case_sensitive: bool = False, no_trim: bool = False) -> str:
+    def contains(self, value: str, case_sensitive: bool = False, trim: bool = True) -> str:
         """case-insensitive"""
-        return self._find(value, ">0", case_sensitive=case_sensitive, no_trim=no_trim)
+        return self._find(value, ">0", case_sensitive=case_sensitive, trim=trim)
 
-    def not_contains(self, value: str, case_sensitive: bool = False, no_trim: bool = False) -> str:
+    def not_contains(self, value: str, case_sensitive: bool = False, trim: bool = True) -> str:
         """case-insensitive"""
-        return self._find(value, "=0", case_sensitive=case_sensitive, no_trim=no_trim)
+        return self._find(value, "=0", case_sensitive=case_sensitive, trim=trim)
 
-    def starts_with(self, value: str, case_sensitive: bool = False, no_trim: bool = False) -> str:
+    def starts_with(self, value: str, case_sensitive: bool = False, trim: bool = True) -> str:
         """case-insensitive"""
-        return self._find(value, "=1", case_sensitive=case_sensitive, no_trim=no_trim)
+        return self._find(value, "=1", case_sensitive=case_sensitive, trim=trim)
 
-    def not_starts_with(
-        self, value: str, case_sensitive: bool = False, no_trim: bool = False
-    ) -> str:
+    def not_starts_with(self, value: str, case_sensitive: bool = False, trim: bool = True) -> str:
         """case-insensitive"""
-        return self._find(value, "!=1", case_sensitive=case_sensitive, no_trim=no_trim)
+        return self._find(value, "!=1", case_sensitive=case_sensitive, trim=trim)
 
     def _ends_with(
-        self, value: str, comparison: str, case_sensitive: bool = False, no_trim: bool = False
+        self, value: str, comparison: str, case_sensitive: bool = False, trim: bool = True
     ) -> str:
         """case-insensitive"""
         if case_sensitive:
-            if no_trim:
-                return f'FIND("{value}", {{{self.name}}}) {comparison} LEN({{{self.name}}}) - LEN("{value}") + 1'
-            else:
+            if trim:
                 return f'FIND(TRIM("{value}"), TRIM({{{self.name}}})) {comparison} LEN(TRIM({{{self.name}}})) - LEN(TRIM("{value}")) + 1'
-        else:
-            if no_trim:
-                return f'FIND(LOWER("{value}"), LOWER({{{self.name}}})) {comparison} LEN(LOWER({{{self.name}}})) - LEN(LOWER("{value}")) + 1'
             else:
+                return f'FIND("{value}", {{{self.name}}}) {comparison} LEN({{{self.name}}}) - LEN("{value}") + 1'
+        else:
+            if trim:
                 return f'FIND(TRIM(LOWER("{value}")), TRIM(LOWER({{{self.name}}}))) {comparison} LEN(TRIM(LOWER({{{self.name}}}))) - LEN(TRIM(LOWER("{value}"))) + 1'
+            else:
+                return f'FIND(LOWER("{value}"), LOWER({{{self.name}}})) {comparison} LEN(LOWER({{{self.name}}})) - LEN(LOWER("{value}")) + 1'
 
-    def ends_with(self, value: str, case_sensitive: bool = False, no_trim: bool = False) -> str:
+    def ends_with(self, value: str, case_sensitive: bool = False, trim: bool = True) -> str:
         """case-insensitive"""
-        return self._ends_with(value, "=", case_sensitive=case_sensitive, no_trim=no_trim)
+        return self._ends_with(value, "=", case_sensitive=case_sensitive, trim=trim)
 
-    def not_ends_with(self, value: str, case_sensitive: bool = False, no_trim: bool = False) -> str:
+    def not_ends_with(self, value: str, case_sensitive: bool = False, trim: bool = True) -> str:
         """case-insensitive"""
-        return self._ends_with(value, "!=", case_sensitive=case_sensitive, no_trim=no_trim)
+        return self._ends_with(value, "!=", case_sensitive=case_sensitive, trim=trim)
 
     def regex_match(self, pattern: str) -> str:
         return f'REGEX_MATCH({{{self.name}}}, "{pattern}")'
