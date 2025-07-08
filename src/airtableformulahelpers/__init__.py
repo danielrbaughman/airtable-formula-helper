@@ -31,15 +31,18 @@ def IF(condition: str) -> "THEN":  # noqa: N802
 class THEN(BaseModel):
     condition: str
 
-    def THEN(self, value_if_true: str) -> "ELSE":  # noqa: N802
-        return ELSE(condition=self.condition, true_value=value_if_true)
+    def THEN(self, value_if_true: str, string: bool = False) -> "ELSE":  # noqa: N802
+        return ELSE(condition=self.condition, true_value=value_if_true, is_true_string=string)
 
 
 class ELSE(THEN):
     true_value: str
+    is_true_string: bool = False
 
-    def ELSE(self, value_if_false: str) -> str:  # noqa: N802
-        return f"IF({self.condition}, {self.true_value}, {value_if_false})"
+    def ELSE(self, value_if_false: str, string: bool = False) -> str:  # noqa: N802
+        true_val = f'"{self.true_value}"' if self.is_true_string else self.true_value
+        false_val = f'"{value_if_false}"' if string else value_if_false
+        return f"IF({self.condition}, {true_val}, {false_val})"
 
 
 def id_equals(id: str) -> str:
@@ -65,37 +68,61 @@ class TextField(Field):
     def not_equals(self, value: str) -> str:
         return f'{{{self.name}}}!="{value}"'
 
-    def _find(self, value: str, comparison: str) -> str:
+    def _find(
+        self, value: str, comparison: str, case_sensitive: bool = False, no_trim: bool = False
+    ) -> str:
         """case-insensitive"""
-        return f'FIND(TRIM(LOWER("{value}")), TRIM(LOWER({{{self.name}}}))){comparison}'
+        if case_sensitive:
+            if no_trim:
+                return f'FIND("{value}", {{{self.name}}}){comparison}'
+            else:
+                return f'FIND(TRIM("{value}"), TRIM({{{self.name}}})){comparison}'
+        else:
+            if no_trim:
+                return f'FIND(LOWER("{value}"), LOWER({{{self.name}}})){comparison}'
+            else:
+                return f'FIND(TRIM(LOWER("{value}")), TRIM(LOWER({{{self.name}}}))){comparison}'
 
-    def contains(self, value: str) -> str:
+    def contains(self, value: str, case_sensitive: bool = False, no_trim: bool = False) -> str:
         """case-insensitive"""
-        return self._find(value, ">0")
+        return self._find(value, ">0", case_sensitive=case_sensitive, no_trim=no_trim)
 
-    def not_contains(self, value: str) -> str:
+    def not_contains(self, value: str, case_sensitive: bool = False, no_trim: bool = False) -> str:
         """case-insensitive"""
-        return self._find(value, "=0")
+        return self._find(value, "=0", case_sensitive=case_sensitive, no_trim=no_trim)
 
-    def starts_with(self, value: str) -> str:
+    def starts_with(self, value: str, case_sensitive: bool = False, no_trim: bool = False) -> str:
         """case-insensitive"""
-        return self._find(value, "=1")
+        return self._find(value, "=1", case_sensitive=case_sensitive, no_trim=no_trim)
 
-    def not_starts_with(self, value: str) -> str:
+    def not_starts_with(
+        self, value: str, case_sensitive: bool = False, no_trim: bool = False
+    ) -> str:
         """case-insensitive"""
-        return self._find(value, "!=1")
+        return self._find(value, "!=1", case_sensitive=case_sensitive, no_trim=no_trim)
 
-    def _ends_with(self, value: str, comparison: str) -> str:
+    def _ends_with(
+        self, value: str, comparison: str, case_sensitive: bool = False, no_trim: bool = False
+    ) -> str:
         """case-insensitive"""
-        return f'FIND(TRIM(LOWER("{value}")), TRIM(LOWER({{{self.name}}}))) {comparison} LEN(TRIM(LOWER({{{self.name}}}))) - LEN(TRIM(LOWER("{value}"))) + 1'
+        if case_sensitive:
+            if no_trim:
+                return f'FIND("{value}", {{{self.name}}}) {comparison} LEN({{{self.name}}}) - LEN("{value}") + 1'
+            else:
+                return f'FIND(TRIM("{value}"), TRIM({{{self.name}}})) {comparison} LEN(TRIM({{{self.name}}})) - LEN(TRIM("{value}")) + 1'
+        else:
+            if no_trim:
+                return f'FIND(LOWER("{value}"), LOWER({{{self.name}}})) {comparison} LEN(LOWER({{{self.name}}})) - LEN(LOWER("{value}")) + 1'
+            else:
+                return f'FIND(TRIM(LOWER("{value}")), TRIM(LOWER({{{self.name}}}))) {comparison} LEN(TRIM(LOWER({{{self.name}}}))) - LEN(TRIM(LOWER("{value}"))) + 1'
 
-    def ends_with(self, value: str) -> str:
+    def ends_with(self, value: str, case_sensitive: bool = False, no_trim: bool = False) -> str:
         """case-insensitive"""
-        return self._ends_with(value, "=")
+        return self._ends_with(value, "=", case_sensitive=case_sensitive, no_trim=no_trim)
 
-    def not_ends_with(self, value: str) -> str:
+    def not_ends_with(self, value: str, case_sensitive: bool = False, no_trim: bool = False) -> str:
         """case-insensitive"""
-        return self._ends_with(value, "!=")
+        return self._ends_with(value, "!=", case_sensitive=case_sensitive, no_trim=no_trim)
 
     def regex_match(self, pattern: str) -> str:
         return f'REGEX_MATCH({{{self.name}}}, "{pattern}")'
@@ -104,17 +131,23 @@ class TextField(Field):
 class TextListField(Field):
     """String list comparison formulas"""
 
-    def contains(self, value: str) -> str:
-        return f'FIND(LOWER("{value}"), LOWER({{{self.name}}}))>0'
+    def contains(self, value: str, case_sensitive: bool = False) -> str:
+        if case_sensitive:
+            return f'FIND("{value}", {{{self.name}}})>0'
+        else:
+            return f'FIND(LOWER("{value}"), LOWER({{{self.name}}}))>0'
 
-    def not_contains(self, value: str) -> str:
-        return f'FIND(LOWER("{value}"), LOWER({{{self.name}}}))=0'
+    def not_contains(self, value: str, case_sensitive: bool = False) -> str:
+        if case_sensitive:
+            return f'FIND("{value}", {{{self.name}}})=0'
+        else:
+            return f'FIND(LOWER("{value}"), LOWER({{{self.name}}}))=0'
 
-    def contains_all(self, values: list[str]) -> str:
-        return AND(*[self.contains(value) for value in values])
+    def contains_all(self, values: list[str], case_sensitive: bool = False) -> str:
+        return AND(*[self.contains(value, case_sensitive=case_sensitive) for value in values])
 
-    def contains_any(self, values: list[str]) -> str:
-        return OR(*[self.contains(value) for value in values])
+    def contains_any(self, values: list[str], case_sensitive: bool = False) -> str:
+        return OR(*[self.contains(value, case_sensitive=case_sensitive) for value in values])
 
 
 class NumberField(Field):
